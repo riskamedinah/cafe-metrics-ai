@@ -2,122 +2,150 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\RingkasanBulanan;
 use App\Models\Penjualan;
-use Illuminate\Http\Request;
+use App\Models\RingkasanBulanan;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
-use Carbon\Carbon;
 
 class RingkasanBulananController extends Controller
 {
     /**
-     * Ambil semua riwayat ringkasan bulanan yang pernah di-generate oleh AI.
-     * Dipakai untuk halaman "Arsip Laporan / Insights" di Figma.
+     * FITUR: Hitung Statistik Omzet & Top 3 Menu Terlaris Bulanan
+     * ENDPOINT: POST /api/ringkasan/hitung
+     * KEGUNAAN: Menghasilkan format raw text untuk dikirim ke API AI (OpenAI/Gemini)
      */
-    public function index(): JsonResponse
-    {
-        $ringkasans = RingkasanBulanan::where('user_id', Auth::id())
-            ->orderBy('tahun', 'desc')
-            ->orderBy('bulan', 'desc')
-            ->get();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Daftar ringkasan bulanan berhasil diambil',
-            'data' => $ringkasans
-        ], 200);
-    }
-
-    /**
-     * Langkah 1: Kumpulkan data penjualan & hitung statistik kafe.
-     * Fungsi ini akan dipanggil pas user milih bulan di Figma lalu klik "Hitung Total Operasional".
-     */
-    public function hitungStatistik(Request $request): JsonResponse
-    {
-        $request->validate([
-            'bulan' => 'required|integer|between:1,12',
-            'tahun' => 'required|integer|min:2020',
+    public function hitungStatistik(Request $request): JsonResponse{
+        $validated = $request->validate([
+            'bulan' => 'required|integer|min:1|max:12',
+            'tahun' => 'required|integer|min:2000',
         ]);
 
-        $userId = Auth::id();
-        $bulan = $request->bulan;
-        $tahun = $request->tahun;
+        $bulan = $validated['bulan'];
+        $tahun = $validated['tahun'];
 
-        // 1. Hitung Total Omzet & Total Barang Terjual di bulan tersebut
-        $statistik = Penjualan::where('user_id', $userId)
+        $penjualans = Penjualan::with('barang')
+            ->where('user_id', Auth::id())
             ->whereMonth('created_at', $bulan)
             ->whereYear('created_at', $tahun)
-            ->selectRaw('SUM(total_harga) as total_omzet, SUM(jumlah) as total_barang_terjual')
-            ->first();
-
-        $totalOmzet = $statistik->total_omzet ?? 0;
-        $totalTerjual = $statistik->total_barang_terjual ?? 0;
-
-        // 2. Cari 3 Menu Terlaris (Top Selling Items)
-        $menuTerlaris = Penjualan::join('barangs', 'penjualans.barang_id', '=', 'barangs.id')
-            ->where('penjualans.user_id', $userId)
-            ->whereMonth('penjualans.created_at', $bulan)
-            ->whereYear('penjualans.created_at', $tahun)
-            ->select('barangs.nama_barang', DB::raw('SUM(penjualans.jumlah) as kuantitas_terjual'))
-            ->groupBy('barangs.id', 'barangs.nama_barang')
-            ->orderByDesc('kuantitas_terjual')
-            ->take(3)
             ->get();
 
-        // 3. Susun teks narasi mentah untuk bahan bakar Prompt AI nanti
-        $namaBulan = Carbon::create()->month($bulan)->translatedFormat('F');
-        $teksMenu = $menuTerlaris->map(fn($item) => "- {$item->nama_barang} ({$item->kuantitas_terjual} pcs)")->implode("\n");
-        
-        $rawDataUntukAI = "Laporan Kafe Bulan: $namaBulan $tahun.\n" .
-                          "Total Omzet: Rp " . number_format($totalOmzet, 0, ',', '.') . "\n" .
-                          "Total Produk Terjual: $totalTerjual pcs\n" .
-                          "Menu Terlaris:\n" . ($teksMenu ?: "- Belum ada data transaksi");
+        if ($penjualans->isEmpty()) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Tidak ada data penjualan pada periode ini',
+                'data' => null,
+            ], 404);
+        }
+
+        $totalOmzet = $penjualans->sum('total_harga');
+        $totalItemTerjual = $penjualans->sum('jumlah');
+
+        $top3 = $penjualans
+            ->groupBy('barang_id')
+            ->map(fn($group) => [
+                'nama_barang' => $group->first()->barang->nama_barang,
+                'total_terjual' => $group->sum('jumlah'),
+            ])
+            ->sortByDesc('total_terjual')
+            ->values()
+            ->take(3);
+
+        $bulanIndo = $this->namaBulanIndonesia($bulan);
+        $omzetFormat = 'Rp ' . number_format($totalOmzet, 0, ',', '.');
+
+        $rawDataAi = "Laporan Penjualan Cafe - {$bulanIndo} {$tahun}\n";
+        $rawDataAi .= "Total Omzet: {$omzetFormat}\n";
+        $rawDataAi .= "Total Item Terjual: {$totalItemTerjual} item\n\n";
+        $rawDataAi .= "Top 3 Menu Terlaris:\n";
+
+        foreach ($top3 as $index => $item) {
+            $no = $index + 1;
+            $rawDataAi .= "{$no}. {$item['nama_barang']} - {$item['total_terjual']} terjual\n";
+        }
 
         return response()->json([
-            'success' => true,
+            'status' => true,
+            'message' => 'Statistik bulanan berhasil dihitung',
             'data' => [
                 'bulan' => $bulan,
                 'tahun' => $tahun,
                 'total_omzet' => $totalOmzet,
-                'total_barang_terjual' => $totalTerjual,
-                'menu_terlaris' => $menuTerlaris,
-                'raw_data_ai' => $rawDataUntukAI // Teks ini yang nanti dikirim ke fungsi generate AI
-            ]
-        ], 200);
+                'total_item_terjual' => $totalItemTerjual,
+                'top_3_terlaris' => $top3,
+                'raw_data_ai' => $rawDataAi,
+            ],
+        ]);
     }
 
     /**
-     * Langkah 2: Simpan hasil analisis dari AI ke Database.
-     * Dipakai setelah tombol "Simpan Laporan" diklik di Figma.
+     * FITUR: Ambil Semua Riwayat Arsip Ringkasan AI
+     * ENDPOINT: GET /api/ringkasan
+     */
+    public function index(): JsonResponse
+    {
+        $ringkasans = RingkasanBulanan::where('user_id', Auth::id())
+            ->latest()
+            ->paginate(15);
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Data ringkasan bulanan berhasil diambil',
+            'data' => $ringkasans,
+        ]);
+    }
+
+    /**
+     * FITUR: Simpan Hasil Analisis AI ke Database
+     * ENDPOINT: POST /api/ringkasan
      */
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'bulan' => 'required|integer|between:1,12',
-            'tahun' => 'required|integer|min:2020',
-            'total_omzet' => 'required|integer',
-            'analisis_ai' => 'required|string', // Teks jawaban/insight dari Gemini/OpenAI
+            'bulan' => 'required|integer|min:1|max:12',
+            'tahun' => 'required|integer|min:2000',
+            'total_omzet' => 'required|integer|min:0',
+            'total_item_terjual' => 'required|integer|min:0',
+            'analisis_ai' => 'required|string',
         ]);
 
-        // Cek apakah bulan tersebut sudah pernah disimpan, kalau sudah kita overwrite (update)
-        $ringkasan = RingkasanBulanan::updateOrCreate(
-            [
-                'user_id' => Auth::id(),
-                'bulan'   => $validated['bulan'],
-                'tahun'   => $validated['tahun'],
-            ],
-            [
-                'total_omzet' => $validated['total_omzet'],
-                'analisis_ai' => $validated['analisis_ai'],
-            ]
-        );
+        $ringkasan = RingkasanBulanan::create([
+            'user_id' => Auth::id(),
+            'bulan' => $validated['bulan'],
+            'tahun' => $validated['tahun'],
+            'total_omzet' => $validated['total_omzet'],
+            'total_item_terjual' => $validated['total_item_terjual'],
+            'analisis_ai' => $validated['analisis_ai'],
+        ]);
 
         return response()->json([
-            'success' => true,
-            'message' => 'Analisis AI bulanan berhasil disimpan ke arsip!',
-            'data' => $ringkasan
+            'status' => true,
+            'message' => 'Ringkasan bulanan berhasil disimpan',
+            'data' => $ringkasan,
         ], 201);
     }
+
+    /**
+     * HELPER METHOD: Mengubah Angka Bulan ke String Bahasa Indonesia
+     */
+    private function namaBulanIndonesia(int $bulan): string
+    {
+        $bulanList = [
+            1 => 'Januari',
+            2 => 'Februari',
+            3 => 'Maret',
+            4 => 'April',
+            5 => 'Mei',
+            6 => 'Juni',
+            7 => 'Juli',
+            8 => 'Agustus',
+            9 => 'September',
+            10 => 'Oktober',
+            11 => 'November',
+            12 => 'Desember',
+        ];
+
+        return $bulanList[$bulan] ?? 'Tidak valid';
+    }
+
 }

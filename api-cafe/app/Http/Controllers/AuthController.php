@@ -3,19 +3,27 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
-    public function register(Request $request): JsonResponse
-    {
+    /**
+     * FITUR: Registrasi Akun Owner Baru
+     * ENDPOINT: POST /api/register
+     * AKSES: Publik
+     * * @param Request $request [name, email, password, password_confirmation]
+     * @return JsonResponse
+     */
+   public function register(Request $request): JsonResponse
+   {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8',
+            'email' => 'required|email|unique:users',
+            'password' => 'required|string|min:8|confirmed',
         ]);
 
         $user = User::create([
@@ -27,51 +35,68 @@ class AuthController extends Controller
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
-            'success' => true,
-            'message' => 'Registrasi owner cafe berhasil',
-            'access_token' => $token,
-            'token_type' => 'Bearer',
+            'status' => true,
+            'message' => 'Registrasi berhasil',
+            'data' => [
+                'user' => $user,
+                'token' => $token,
+                'token_type' => 'Bearer',
+            ],
         ], 201);
-    }
+   }
 
+   /**
+     * FITUR: Login Autentikasi User
+     * ENDPOINT: POST /api/login
+     * AKSES: Publik
+     * * @param Request $request [email, password]
+     * @return JsonResponse
+     */
     public function login(Request $request): JsonResponse
     {
-        $validated = $request->validate([
+        $request->validate([
             'email' => 'required|email',
             'password' => 'required',
         ]);
 
-        $user = User::where('email', $validated['email'])->first();
-
-        if (!$user || !Hash::check($validated['password'], $user->password)) {
+        if (!Auth::attempt($request->only('email', 'password'))){
             return response()->json([
-                'success' => false,
-                'message' => 'Email atau password salah.'
+                'status' => false,
+                'message' => 'Email atau password salah',
+                'data' => null,
             ], 401);
         }
 
-        // Hapus token lama biar ga menumpuk di db (opsional)
-        $user->tokens()->delete();
-
-        // Buat token baru
+        $user = Auth::user();
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
-            'success' => true,
-            'message' => 'Login sukses! Selamat datang kembali.',
-            'access_token' => $token,
-            'token_type' => 'Bearer',
-        ], 200);
+            'status' => true,
+            'message' => 'Login berhasil',
+            'data' => [
+                'user' => $user,
+                'access_token' => $token,
+                'token_type' => 'Bearer',
+            ],
+        ]);
     }
 
-    public function logout(Request $request): JsonResponse
-    {
-        // Hapus token yang sedang digunakan untuk login saat ini
-        $request->user()->currentAccessToken()->delete();
+    /**
+     * FITUR: Logout Akun (Hapus Token Aktif)
+     * ENDPOINT: POST /api/logout
+     * AKSES: Terproteksi Token (Bearer Token)
+     * * @param Request $request
+     * @return JsonResponse
+     */
+     public function logout(Request $request): JsonResponse 
+        {
+            $request->user()->currentAccessToken()->delete();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Berhasil logout, token dicabut.'
-        ], 200);
-    }
+            return response()->json([
+                'status' => true,
+                'meassage' => 'Logout berhasil',
+                'data' => null,
+            ]);
+        }
+
 }

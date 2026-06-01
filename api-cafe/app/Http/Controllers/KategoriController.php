@@ -3,99 +3,117 @@
 namespace App\Http\Controllers;
 
 use App\Models\Kategori;
-use App\Http\Requests\StoreKategoriRequest;
-use App\Http\Requests\UpdateKategoriRequest;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class KategoriController extends Controller
 {
     /**
-     * Tampilkan semua kategori milik user yang sedang login.
-     * Dipakai untuk mengisi tabel di halaman "Management Kategori" Figma.
+     * FITUR: List Semua Data Kategori
+     * ENDPOINT: GET /api/kategori
+     * AKSES: Terproteksi Token (Hanya mengambil data milik user yang login)
+     * @return JsonResponse
      */
-    public function index(): JsonResponse
+   public function index(): JsonResponse
     {
         $kategoris = Kategori::where('user_id', Auth::id())->get();
 
         return response()->json([
-            'success' => true,
-            'message' => 'Daftar kategori berhasil diambil',
-            'data' => $kategoris
-        ], 200);
+            'status' => true,
+            'message' => 'Data kategori berhasil diambil',
+            'data' => $kategoris,
+        ]);
     }
 
     /**
-     * Simpan kategori baru dari form input Figma.
+     * FITUR: Membuat Kategori Baru
+     * ENDPOINT: POST /api/kategori
+     * AKSES: Terproteksi Token
+     * @param Request $request [nama_kategori]
+     * @return JsonResponse
      */
-    public function store(StoreKategoriRequest $request): JsonResponse
+    public function store(Request $request): JsonResponse
     {
-        // Data otomatis divalidasi oleh StoreKategoriRequest sebelum masuk ke sini
-        $validated = $request->validated();
-
-        // Gabungkan data input dengan user_id owner yang sedang login
-        $kategori = Kategori::create([
-            'user_id' => Auth::id(),
-            'nama_kategori' => $validated['nama_kategori']
+        $validated = $request->validate([
+            'nama_kategori' => 'required|string|max:255',
         ]);
 
+        $kategori = Kategori::create([
+            'user_id' => Auth::id(),
+            'nama_kategori' => $validated['nama_kategori'],
+        ]); 
+
         return response()->json([
-            'success' => true,
-            'message' => 'Kategori baru berhasil ditambahkan',
-            'data' => $kategori
+            'status' => true,
+            'message' => 'Kategori berhasil ditambahkan',
+            'data' => $kategori,
         ], 201);
     }
 
     /**
-     * Tampilkan detail satu kategori (jika diperlukan).
+     * FITUR: Mengubah Data Kategori
+     * ENDPOINT: PUT /api/kategori/{id}
+     * AKSES: Terproteksi Token (Hanya bisa mengubah milik sendiri)
+     * @param Request $request [nama_kategori]
+     * @param int $id
+     * @return JsonResponse
      */
-    public function show(Kategori $kategori): JsonResponse
+    public function update(Request $request, $id): JsonResponse
     {
-        // Validasi kepemilikan data
-        if ($kategori->user_id !== Auth::id()) {
-            return response()->json(['message' => 'Akses ditolak'], 403);
+        $kategori = Kategori::where('id', $id)
+            ->where('user_id', Auth::id())
+            ->first();
+
+        if (!$kategori) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Kategori tidak ditemukan',
+                'data' => null,
+            ], 404);
         }
 
-        return response()->json([
-            'success' => true,
-            'data' => $kategori
-        ], 200);
-    }
+        $validated = $request->validate([
+            'nama_kategori' => 'required|string|max:255',
+        ]);
 
-    /**
-     * Proses edit/update kategori dari modal edit di Figma.
-     */
-    public function update(UpdateKategoriRequest $request, Kategori $kategori): JsonResponse
-    {
-        if ($kategori->user_id !== Auth::id()) {
-            return response()->json(['message' => 'Akses ditolak'], 403);
-        }
-
-        $validated = $request->validated();
         $kategori->update($validated);
 
         return response()->json([
-            'success' => true,
+            'status' => true,
             'message' => 'Kategori berhasil diperbarui',
-            'data' => $kategori
-        ], 200);
+            'data' => $kategori,
+        ]);
     }
 
     /**
-     * Hapus kategori dari tombol "Delete" di tabel Figma.
+     * FITUR: Menghapus Kategori
+     * ENDPOINT: DELETE /api/kategori/{id}
+     * AKSES: Terproteksi Token (Hanya bisa menghapus milik sendiri)
+     * @param int $id
+     * @return JsonResponse
      */
-    public function destroy(Kategori $kategori): JsonResponse
+    public function destroy(int $id): JsonResponse
     {
-        if ($kategori->user_id !== Auth::id()) {
-            return response()->json(['message' => 'Akses ditolak'], 403);
+        $kategori = Kategori::where('id', $id)
+            ->where('user_id', Auth::id())
+            ->first();
+
+        if (!$kategori) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Kategori tidak ditemukan',
+                'data' => null,
+            ], 404);
         }
 
-        // Karena di migration kita pakai cascade, barang di dalam kategori ini otomatis ikut terhapus
         $kategori->delete();
 
         return response()->json([
-            'success' => true,
-            'message' => 'Kategori berhasil dihapus'
-        ], 200);
+            'status' => true,
+            'message' => 'Kategori berhasil dihapus',
+            'data' => null,
+        ]);
     }
+
 }
