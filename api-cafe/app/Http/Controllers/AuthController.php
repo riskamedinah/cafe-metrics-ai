@@ -15,8 +15,6 @@ class AuthController extends Controller
      * FITUR: Registrasi Akun Owner Baru
      * ENDPOINT: POST /api/register
      * AKSES: Publik
-     * * @param Request $request [name, email, password, password_confirmation]
-     * @return JsonResponse
      */
    public function register(Request $request): JsonResponse
    {
@@ -49,8 +47,6 @@ class AuthController extends Controller
      * FITUR: Login Autentikasi User
      * ENDPOINT: POST /api/login
      * AKSES: Publik
-     * * @param Request $request [email, password]
-     * @return JsonResponse
      */
     public function login(Request $request): JsonResponse
     {
@@ -85,8 +81,6 @@ class AuthController extends Controller
      * FITUR: Logout Akun (Hapus Token Aktif)
      * ENDPOINT: POST /api/logout
      * AKSES: Terproteksi Token (Bearer Token)
-     * * @param Request $request
-     * @return JsonResponse
      */
      public function logout(Request $request): JsonResponse 
         {
@@ -94,7 +88,7 @@ class AuthController extends Controller
 
             return response()->json([
                 'status' => true,
-                'meassage' => 'Logout berhasil',
+                'message' => 'Logout berhasil',
                 'data' => null,
             ]);
         }

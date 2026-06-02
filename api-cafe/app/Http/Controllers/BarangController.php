@@ -6,7 +6,6 @@ use App\Models\Barang;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
 
 class BarangController extends Controller
 {
@@ -46,7 +45,11 @@ class BarangController extends Controller
 
         $fotoPath = null;
         if ($request->hasFile('foto_barang')) {
-            $fotoPath = $request->file('foto_barang')->store('barangs', 'public');
+           $uploaded = cloudinary()->upload(
+                $request->file('foto_barang')->getRealPath(),
+                ['folder' => 'cafe_metrics']
+            );
+            $fotoPath = $uploaded->getSecurePath();
         }
 
         $barang = Barang::create([

@@ -20,7 +20,7 @@ class Barang extends Model
    protected $appends = ['foto_url'];
 
    public function getFotoUrlAttribute(): ?string{
-        return $this->foto_barang ? Storage::url($this->foto_barang) : null;
+        return $this->foto_barang;
    }
     
    public function kategori() {
