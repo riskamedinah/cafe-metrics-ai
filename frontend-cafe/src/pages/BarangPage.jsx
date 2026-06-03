@@ -1,0 +1,1 @@
+const BarangPage = () => <div>BarangPage</div>; export default BarangPage;

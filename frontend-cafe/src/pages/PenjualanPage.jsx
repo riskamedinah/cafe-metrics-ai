@@ -1,0 +1,1 @@
+const PenjualanPage = () => <div>PenjualanPage</div>; export default PenjualanPage;

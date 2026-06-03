@@ -1,0 +1,1 @@
+const GenerateRingkasanPage = () => <div>GenerateRingkasanPage</div>; export default GenerateRingkasanPage;
