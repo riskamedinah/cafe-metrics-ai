@@ -1,6 +1,6 @@
-import { CreateContext, useContext, useState } from "react";
+import { createContext, useContext, useState } from "react";
 
-const AuthContext = CreateContext(null);
+const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(localStorage.getItem('token'))
