@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
-import ProtectedRoute from './router/ProtectedRoute';
+// import ProtectedRoute from './router/ProtectedRoute';  // ← COMMENT INI
 
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
@@ -16,19 +16,11 @@ function App() {
         <AuthProvider>
             <BrowserRouter>
                 <Routes>
-                    {/* Public */}
                     <Route path="/login" element={<LoginPage />} />
                     <Route path="/register" element={<RegisterPage />} />
 
-                    {/* Protected */}
-                    <Route
-                        path="/"
-                        element={
-                            <ProtectedRoute>
-                                <MainLayout />  {/* Outlet ada di sini */}
-                            </ProtectedRoute>
-                        }
-                    >
+                    {/* SEMUA ROUTE JADI PUBLIC SEMENTARA */}
+                    <Route path="/" element={<MainLayout />}>
                         <Route index element={<Navigate to="/dashboard" replace />} />
                         <Route path="dashboard" element={<DashboardPage />} />
                         <Route path="barang" element={<BarangPage />} />
