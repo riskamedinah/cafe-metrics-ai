@@ -13,7 +13,7 @@ const AuthLayout = ({ children }) => {
       </div>
 
       {/* Right Panel - Form */}
-      <div className="flex-1 flex items-center justify-center px-6 py-12 bg-white">
+      <div className="flex-1 flex items-center justify-center px-12 py-8 bg-white">
         {children}
       </div>
     </div>

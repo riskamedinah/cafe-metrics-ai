@@ -13,7 +13,7 @@ const PasswordField = ({
 
     return (
         <div>
-             <label className="block font-semibold">
+            <label className="block text-base font-medium text-gray-700 mb-1.5">
                 {label} {required && <span className="text-red-500">*</span>}
             </label>
             <div className="relative">
@@ -24,13 +24,13 @@ const PasswordField = ({
                     onChange={onChange}
                     placeholder={placeholder}
                     required={required}
-                    className={`w-full px-4 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#3B5BDB] focus:border-transparent transition pr-10 ${
+                    className={`w-full px-4 py-2.5 border rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-[#3B5BDB] focus:border-transparent transition pr-10 ${
                         error ? 'border-red-400' : 'border-gray-300'
                     }`}
                 />
                 <button
                     type="button"
-                    onClick={() => setShowPassword(!showPassword)}  // ← ONCLICK (huruf besar C)
+                    onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                 >
                     {showPassword ? (
@@ -50,4 +50,4 @@ const PasswordField = ({
     )
 }
 
-export default PasswordField;
+export default PasswordField

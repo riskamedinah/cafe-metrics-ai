@@ -68,7 +68,7 @@ const RegisterPage = () => {
       <div className="w-full max-w-xl">  
         {/* Header */}
         <div className="text-center mb-8">
-          <h2 className="text-3xl font-semibold text-gray-900">Register</h2> 
+          <h2 className="text-3xl font-medium text-gray-900">Register</h2> 
           <p className="text-gray-500 text-base mt-1">
             Isi nama, email, dan password untuk membuat akun Anda.
           </p>
@@ -91,7 +91,6 @@ const RegisterPage = () => {
             onChange={handleChange}
             placeholder="Masukkan nama Anda"
             error={errors.name?.[0]}
-            required
           />
 
           <InputField 
