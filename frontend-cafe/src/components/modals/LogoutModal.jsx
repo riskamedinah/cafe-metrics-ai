@@ -7,11 +7,11 @@ const LogoutModal = ({ isOpen, onClose, onConfirm }) => {
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-xl shadow-xl w-full max-w-sm mx-4 p-6"
+        className="bg-white rounded-xl shadow-xl w-full max-w-sm mx-4 overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between px-6 pt-5 pb-3">
           <h2 className="text-base font-semibold text-gray-800">Logout</h2>
           <button
             onClick={onClose}
@@ -23,13 +23,21 @@ const LogoutModal = ({ isOpen, onClose, onConfirm }) => {
           </button>
         </div>
 
+        {/* Garis 1 */}
+        <div className="border-t border-gray-100" />
+
         {/* Body */}
-        <p className="text-sm text-gray-600 mb-6">
-          Apakah kamu yakin akan <span className="font-semibold">Logout</span> dari sistem?
-        </p>
+        <div className="px-6 py-5">
+          <p className="text-sm text-gray-600">
+            Apakah kamu yakin akan <span className="font-semibold">Logout</span> dari sistem?
+          </p>
+        </div>
+
+        {/* Garis 2 */}
+        <div className="border-t border-gray-100" />
 
         {/* Actions */}
-        <div className="flex justify-end gap-3">
+        <div className="flex justify-end gap-3 px-6 py-4 bg-white">
           <button
             onClick={onClose}
             className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"

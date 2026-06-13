@@ -28,18 +28,6 @@ const mockBarang = [
     deskripsi: "Black Cotton Breathable Fit",
     gambar: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&q=80",
   },
-  {
-    id: 5,
-    nama: "Celana Jogger",
-    deskripsi: "Slim Fit Stretch Fabric",
-    gambar: "https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?w=400&q=80",
-  },
-  {
-    id: 6,
-    nama: "Topi Baseball",
-    deskripsi: "Adjustable Unisex Cap",
-    gambar: "https://images.unsplash.com/photo-1588850561407-ed78c282e89b?w=400&q=80",
-  },
 ];
 
 // ─── Main Page Component ──────────────────────────────────────────────────────

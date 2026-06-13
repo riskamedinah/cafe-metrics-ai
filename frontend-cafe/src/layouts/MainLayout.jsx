@@ -209,20 +209,27 @@ const Topbar = ({ onMenuClick }) => {
           />
 
           {/* Dropdown */}
-          {dropdownOpen && (
-            <div className="absolute right-0 top-full mt-2 w-44 bg-white rounded-xl shadow-lg border border-gray-100 py-1 z-50">
-              <button
-                onClick={() => {
-                  setDropdownOpen(false)
-                  setShowLogoutModal(true) // ← buka modal, bukan langsung logout
-                }}
-                className="flex items-center gap-2.5 w-full px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 hover:text-red-600 transition-colors"
-              >
-                <LogOut size={16} />
-                Logout
-              </button>
-            </div>
-          )}
+        {dropdownOpen && (
+  <div className="absolute right-0 top-full mt-2 w-40 bg-white rounded-xl shadow-lg border border-gray-100 py-2 px-2 z-50">
+    <button
+      onClick={() => {
+        setDropdownOpen(false);
+        setShowLogoutModal(true);
+      }}
+      className="flex items-center gap-2.5 w-full px-3 py-2.5 text-sm text-white font-medium transition-colors rounded-lg mx-1"
+    style={{
+  background: "#EF4444",
+  width: "calc(100% - 8px)",
+  color: "#fff",
+}}
+onMouseEnter={(e) => (e.currentTarget.style.background = "#DC2626")}
+onMouseLeave={(e) => (e.currentTarget.style.background = "#EF4444")}
+    >
+      <LogOut size={16} />
+      Logout
+    </button>
+  </div>
+)}
         </div>
       </header>
 
