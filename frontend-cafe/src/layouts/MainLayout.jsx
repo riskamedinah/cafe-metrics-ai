@@ -13,8 +13,8 @@ const pageTitles = {
   '/dashboard': 'Dashboard',
   '/barang': 'Barang',
   '/penjualan': 'Management Penjualan',
-  '/barang-management': 'Barang',
-  '/kategori': 'Kategori',
+  '/barang-management': 'Management Barang',
+  '/kategori': 'Management Kategori',
   '/ringkasan': 'Ringkasan Bulanan',
   '/generate': 'Generate Ringkasan',
 }

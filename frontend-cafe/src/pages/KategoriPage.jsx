@@ -1,0 +1,1 @@
+const KategoriPage = () => <div>KategoriPage</div>; export default KategoriPage;
