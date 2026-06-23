@@ -117,7 +117,7 @@ const SidebarContent = ({ onClose }) => {
         </div>
 
         <NavLink
-          to="/ringkasan"
+          to="/ringkasan-bulanan"
           onClick={onClose}
           className={({ isActive }) => `${navBase} ${isActive ? navActive : navInactive}`}
         >

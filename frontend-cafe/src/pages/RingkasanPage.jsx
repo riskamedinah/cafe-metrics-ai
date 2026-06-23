@@ -1,1 +1,0 @@
-const RingkasanPage = () => <div>RingkasanPage</div>; export default RingkasanPage;

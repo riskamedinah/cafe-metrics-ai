@@ -7,7 +7,7 @@ import RegisterPage from './pages/RegisterPage';
 import DashboardPage from './pages/DashboardPage';
 import BarangPage from './pages/BarangPage';
 import PenjualanPage from './pages/PenjualanPage';
-import RingkasanPage from './pages/RingkasanPage';
+import RingkasanPage from './pages/RingkasanBulananPage';
 import BarangManagementPage from './pages/BarangManagement';
 import KategoriPage from './pages/KategoriPage';
 
@@ -28,7 +28,7 @@ function App() {
                         <Route path="dashboard" element={<DashboardPage />} />
                         <Route path="barang" element={<BarangPage />} />
                         <Route path="penjualan" element={<PenjualanPage />} />
-                        <Route path="ringkasan" element={<RingkasanPage />} />
+                        <Route path="ringkasan-bulanan" element={<RingkasanPage />} />
                         <Route path="barang-management" element={<BarangManagementPage />} />
                         <Route path="kategori" element={<KategoriPage />} />
                     </Route>

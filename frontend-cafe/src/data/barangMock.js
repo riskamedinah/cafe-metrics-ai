@@ -11,7 +11,7 @@ export const mockBarang = [
     id: 2,
     nama: "Tumbler Stainless",
     harga: 150000,
-    kategori: "Kebutuhan Rumah",
+    kategori: "Merchandise",
     deskripsi: "Vacuum Insulated 600ml untuk menjaga suhu air tetap dingin/panas.",
     gambar: "/tumblr.svg",
   },
