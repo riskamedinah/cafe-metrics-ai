@@ -15,32 +15,33 @@ const BarangCard = ({ item, onBeli }) => {
     <div
       style={{
         background: "#ffffff",
-        borderRadius: "12px",
-        border: "1px solid #E8E9EC",
-        overflow: "hidden",
+        borderRadius: "16px",
+        padding: "15px",
         display: "flex",
         flexDirection: "column",
-        boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
+        boxShadow: "0 1px 2px rgba(0,0,0,0.04)",
         transition: "transform 0.15s ease, box-shadow 0.15s ease",
       }}
       onMouseEnter={(e) => {
         e.currentTarget.style.transform = "translateY(-2px)";
-        e.currentTarget.style.boxShadow = "0 4px 12px rgba(0,0,0,0.1)";
+        e.currentTarget.style.boxShadow = "0 4px 12px rgba(0,0,0,0.08)";
       }}
       onMouseLeave={(e) => {
         e.currentTarget.style.transform = "translateY(0)";
-        e.currentTarget.style.boxShadow = "0 1px 3px rgba(0,0,0,0.06)";
+        e.currentTarget.style.boxShadow = "0 1px 2px rgba(0,0,0,0.04)";
       }}
     >
       {/* Image Area */}
       <div
         style={{
           background: "#F4F5F7",
-          height: "160px",
+          aspectRatio: "3 / 2",
+          borderRadius: "10px",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
           overflow: "hidden",
+          marginBottom: "16px",
         }}
       >
         {!imgError ? (
@@ -76,55 +77,58 @@ const BarangCard = ({ item, onBeli }) => {
       </div>
 
       {/* Info & Button */}
-      <div style={{ padding: "14px 16px 16px" }}>
-        <p
-          style={{
-            fontFamily: "'Geist Variable', 'Inter', sans-serif",
-            fontSize: "14px",
-            fontWeight: 600,
-            color: "#1E1F24",
-            margin: 0,
-            marginBottom: "2px",
-            lineHeight: 1.4,
-          }}
-        >
-          {item.nama}
-        </p>
-        <p
-          style={{
-            fontFamily: "'Geist Variable', 'Inter', sans-serif",
-            fontSize: "12px",
-            fontWeight: 400,
-            color: "#9DA3AE",
-            margin: 0,
-            marginBottom: "14px",
-            lineHeight: 1.4,
-          }}
-        >
-          {item.deskripsi}
-        </p>
+      <p
+        style={{
+          fontFamily: "'Geist Variable', 'Inter', sans-serif",
+          fontSize: "16px",
+          fontWeight: 500,
+          color: "#1E1F24",
+          margin: 0,
+          marginBottom: "4px",
+          lineHeight: 1.4,
+        }}
+      >
+        {item.nama}
+      </p>
+      <p
+  style={{
+    fontFamily: "'Geist Variable', 'Inter', sans-serif",
+    fontSize: "14px",
+    fontWeight: 400,
+    color: "#5E5E5E",
+    margin: 0,
+    marginBottom: "16px",
+    lineHeight: 1.4,
+    display: "-webkit-box",
+    WebkitLineClamp: 1,
+    WebkitBoxOrient: "vertical",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+  }}
+>
+  {item.deskripsi}
+</p>
 
-        <button
-          onClick={handleBeli}
-          style={{
-            width: "100%",
-            padding: "9px 0",
-            background: "#3B5BDB",
-            color: "#ffffff",
-            border: "none",
-            borderRadius: "8px",
-            fontFamily: "'Geist Variable', 'Inter', sans-serif",
-            fontSize: "13px",
-            fontWeight: 600,
-            cursor: "pointer",
-            transition: "background 0.15s ease",
-          }}
-          onMouseEnter={(e) => (e.currentTarget.style.background = "#3451C7")}
-          onMouseLeave={(e) => (e.currentTarget.style.background = "#3B5BDB")}
-        >
-          Beli Sekarang
-        </button>
-      </div>
+      <button
+        onClick={handleBeli}
+        style={{
+          width: "100%",
+          padding: "11px 0",
+          background: "#3A72D2",
+          color: "#ffffff",
+          border: "none",
+          borderRadius: "8px",
+          fontFamily: "'Geist Variable', 'Inter', sans-serif",
+          fontSize: "13px",
+          fontWeight: 600,
+          cursor: "pointer",
+          transition: "background 0.15s ease",
+        }}
+        onMouseEnter={(e) => (e.currentTarget.style.background = "#3569C1")}
+        onMouseLeave={(e) => (e.currentTarget.style.background = "#3A72D2")}
+      >
+        Beli Sekarang
+      </button>
     </div>
   );
 };

@@ -10,58 +10,7 @@ import {
 } from "recharts";
 import { Package, TrendingDown, ShoppingCart, Wallet } from "lucide-react";
 import TabelPenjualan from "../components/ui/TabelPenjualan";
-
-// ─── Mock Data ────────────────────────────────────────────────────────────────
-
-const STAT_CARDS = [
-  {
-    id: "penjualan-hari",
-    label: "Penjualan Hari Ini",
-    value: "4",
-    icon: Package,
-  },
-  {
-    id: "pendapatan-hari",
-    label: "Pendapatan Hari Ini",
-    value: "Rp 1.000.000",
-    icon: TrendingDown,
-  },
-  {
-    id: "penjualan-bulan",
-    label: "Penjualan Bulan Ini",
-    value: "5",
-    icon: ShoppingCart,
-  },
-  {
-    id: "pendapatan-bulan",
-    label: "Pendapatan Bulan Ini",
-    value: "Rp 1.250.000",
-    icon: Wallet,
-  },
-];
-
-const CHART_DATA = [
-  { minggu: "Minggu 1", totalPenjualan: 2, totalHarga: 250000 },
-  { minggu: "Minggu 2", totalPenjualan: 3, totalHarga: 1000000 },
-  { minggu: "Minggu 3", totalPenjualan: 2, totalHarga: 200000 },
-  { minggu: "Minggu 4", totalPenjualan: 3.5, totalHarga: 350000 },
-];
-
-// Data untuk dashboard (bisa diambil dari API nanti)
-const DASHBOARD_TABLE_DATA = [
-  {
-    id: 1,
-    namaProduk: "Sepatu Running",
-    harga: 100000,
-    jumlah: 2,
-  },
-  {
-    id: 2,
-    namaProduk: "Baju Sporty",
-    harga: 150000,
-    jumlah: 1,
-  },
-];
+import { STAT_CARDS, CHART_DATA, DASHBOARD_TABLE_DATA } from "../data/DashboardMock";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -351,6 +300,7 @@ const DashboardPage = () => {
                     strokeWidth={2}
                     dot={{ r: 4, fill: "white", stroke: "#3B5BDB", strokeWidth: 2 }}
                     activeDot={{ r: 6, fill: "white", stroke: "#3451C7", strokeWidth: 2.5 }}
+                    isAnimationActive={false}
                   />
                   <Line
                     yAxisId="right"
@@ -361,6 +311,7 @@ const DashboardPage = () => {
                     strokeDasharray="6 4"
                     dot={{ r: 4, fill: "white", stroke: "#94A3B8", strokeWidth: 2 }}
                     activeDot={{ r: 6, fill: "white", stroke: "#64748B", strokeWidth: 2.5 }}
+                    isAnimationActive={false}
                   />
                 </LineChart>
               </ResponsiveContainer>

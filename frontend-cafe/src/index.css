@@ -2,10 +2,9 @@
 @import "tailwindcss";
 
 :root {
-  --color-primary: #3B5BDB;
-  --color-primary-hover: #3451C7;
+  --color-primary: #3A72D2;
+  --color-primary-hover: #3569C1;
 
-  /* Neutral dari style guide */
   --color-neutral-50: #F4F5F7;
   --color-neutral-100: #E3E4EA;
   --color-neutral-200: #CACCD7;

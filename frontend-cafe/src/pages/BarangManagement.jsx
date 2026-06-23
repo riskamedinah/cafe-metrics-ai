@@ -109,25 +109,22 @@ const ManagementBarang = () => {
 
   return (
     <div className="mx-auto max-w-7xl px-10 py-8">
-      
-    <div className="flex flex-col sm:flex-row items-start justify-between gap-4 w-full">
   
-  <div className="w-full sm:w-auto sm:max-w-xs">
-    <BaseSearch
-      value={searchQuery}
-      onChange={(e) => setSearchQuery(e.target.value)}
-      placeholder="Cari Barang"
-    />
-  </div>
-
-  <button
+   <div className="flex flex-col sm:flex-row items-start justify-between gap-4 w-full mb-4">
+          <BaseSearch
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+        placeholder="Cari Barang"
+      />
+       
+             <button
     onClick={() => setModalTambah(true)}
-    className="flex items-center gap-2 rounded-lg bg-[#3B5BDB] px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#3451C7]">
+    className="flex items-center gap-2 rounded-lg bg-[#3B5BDB] px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#3451C7] whitespace-nowrap"
+  >
     <Plus size={18} strokeWidth={2} />
     Tambah Barang
   </button>
-
-</div>
+        </div>
 
       {/* Card Tabel */}
       <div className="rounded-xl bg-white p-6 shadow-sm">
