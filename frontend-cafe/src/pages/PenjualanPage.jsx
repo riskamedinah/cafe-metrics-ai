@@ -25,12 +25,13 @@ export default function ManagementPenjualan() {
         fontFamily: "'Geist Variable', 'Inter', sans-serif",
       }}
     >
-      {/* 2. Panggil BaseSearch yang baru, beres tanpa tumpukan inline-style panjang */}
-      <BaseSearch 
-        value={search} 
-        onChange={(e) => setSearch(e.target.value)} 
-        placeholder="Cari Penjualan" 
-      />
+      <div className="flex flex-col sm:flex-row items-start justify-between gap-4 w-full mb-4">
+        <BaseSearch
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Cari Kategori"
+        />
+      </div>
 
       {/* Panel/Card seperti di Dashboard */}
       <div
@@ -41,7 +42,6 @@ export default function ManagementPenjualan() {
           padding: "24px",
         }}
       >
-        {/* Tabel Penjualan */}
         <TabelPenjualan 
           data={filteredData} 
           onDataChange={setPenjualan} 

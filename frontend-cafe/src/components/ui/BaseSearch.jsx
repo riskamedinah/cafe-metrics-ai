@@ -8,10 +8,10 @@ const BaseSearch = ({ value, onChange, placeholder = "Cari...", ...props }) => {
         flex items-center gap-2.5 
         bg-white border border-[#DDE1E7] rounded-lg 
         px-3.5 py-2.5 
-        w-full sm:max-w-[340px]
+        w-full sm:max-w-85
       `}
     >
-      <Search size={20} className="text-neutral-500 flex-shrink-none" strokeWidth={2} />
+      <Search size={20} className="text-neutral-500" strokeWidth={2} />
       <input
         type="text"
         value={value}
