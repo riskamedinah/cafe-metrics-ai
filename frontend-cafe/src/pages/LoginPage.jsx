@@ -31,24 +31,24 @@ const LoginPage = () => {
         setError('')
     }
 
-    const handleSubmit = async (e) => {
-        e.preventDefault()
-        setLoading(true)
-        setError('')
-        try {
-            const res = await api.post('/login', form)
-            if (res.data.status) {
-                login(res.data.data.user, res.data.data.access_token)
-                navigate('/dashboard')
-            } else {
-                setError(res.data.message)
-            }
-        } catch (err) {
-            setError(err.response?.data?.message || 'Login gagal, coba lagi.')
-        } finally {
-            setLoading(false)
-        }
+   const handleSubmit = async (e) => {
+  e.preventDefault();
+  setLoading(true);
+  setError('');
+  try {
+    const res = await api.post('/login', form);
+    if (res.data.status) {
+      login(res.data.data.user, res.data.data.access_token, remember);
+      navigate('/dashboard');
+    } else {
+      setError(res.data.message);
     }
+  } catch (err) {
+    setError(err.response?.data?.message || 'Login gagal, coba lagi.');
+  } finally {
+    setLoading(false);
+  }
+};
 
     return (
         <AuthLayout>

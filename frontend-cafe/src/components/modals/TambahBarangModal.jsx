@@ -2,11 +2,12 @@ import React, { useState } from "react";
 import { FilePlus, ChevronDown } from "lucide-react";
 import BaseModal from "../ui/BaseModal";
 
-const TambahBarangModal = ({ isOpen, onClose, onSave }) => {
+const TambahBarangModal = ({ isOpen, onClose, onSave, kategoriList = [] }) => {
   const [form, setForm] = useState({
     nama: "",
     harga: "",
-    kategori: "",
+    kategori_id: "",
+    stok: "", // UBAH: tambah stok
     deskripsi: "",
     gambar: "",
   });
@@ -37,21 +38,24 @@ const TambahBarangModal = ({ isOpen, onClose, onSave }) => {
   };
 
   const handleSubmit = () => {
-    if (!form.nama || !form.harga || !form.kategori) {
-      alert("Nama, Harga, dan Kategori wajib diisi.");
+    // UBAH: validasi stok juga
+    if (!form.nama || !form.harga || !form.kategori_id || form.stok === "") {
+      alert("Nama, Harga, Kategori, dan Stok wajib diisi.");
       return;
     }
     onSave({
       ...form,
       harga: parseFloat(form.harga.replace(/\./g, "")) || 0,
+      stok: parseInt(form.stok, 10) || 0, // UBAH
     });
-    setForm({ nama: "", harga: "", kategori: "", deskripsi: "", gambar: "" });
+    // Reset
+    setForm({ nama: "", harga: "", kategori_id: "", stok: "", deskripsi: "", gambar: "" });
     setFilePreview(null);
     setFileName("");
   };
 
   const handleClose = () => {
-    setForm({ nama: "", harga: "", kategori: "", deskripsi: "", gambar: "" });
+    setForm({ nama: "", harga: "", kategori_id: "", stok: "", deskripsi: "", gambar: "" });
     setFilePreview(null);
     setFileName("");
     onClose();
@@ -62,15 +66,7 @@ const TambahBarangModal = ({ isOpen, onClose, onSave }) => {
       <div style={{ padding: "24px" }}>
         {/* Nama Barang */}
         <div style={{ marginBottom: 18 }}>
-          <label
-            style={{
-              display: "block",
-              fontSize: 13,
-              fontWeight: 600,
-              color: "#1E1F24",
-              marginBottom: 6,
-            }}
-          >
+          <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "#1E1F24", marginBottom: 6 }}>
             Nama Barang
           </label>
           <input
@@ -79,33 +75,13 @@ const TambahBarangModal = ({ isOpen, onClose, onSave }) => {
             value={form.nama}
             onChange={handleChange}
             placeholder="Masukkan nama barang"
-            style={{
-              width: "100%",
-              padding: "10px 14px",
-              border: "1px solid #DDE1E7",
-              borderRadius: 8,
-              fontSize: 13,
-              color: "#374151",
-              outline: "none",
-              fontFamily: "inherit",
-              transition: "border-color 0.15s",
-            }}
-            onFocus={(e) => (e.target.style.borderColor = "#3A72D2")}
-            onBlur={(e) => (e.target.style.borderColor = "#DDE1E7")}
+            style={{ width: "100%", padding: "10px 14px", border: "1px solid #DDE1E7", borderRadius: 8, fontSize: 13, color: "#374151", outline: "none", fontFamily: "inherit" }}
           />
         </div>
 
         {/* Harga Barang */}
         <div style={{ marginBottom: 18 }}>
-          <label
-            style={{
-              display: "block",
-              fontSize: 13,
-              fontWeight: 600,
-              color: "#1E1F24",
-              marginBottom: 6,
-            }}
-          >
+          <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "#1E1F24", marginBottom: 6 }}>
             Harga Barang
           </label>
           <input
@@ -114,88 +90,50 @@ const TambahBarangModal = ({ isOpen, onClose, onSave }) => {
             value={form.harga}
             onChange={handleChange}
             placeholder="Masukkan harga barang"
-            style={{
-              width: "100%",
-              padding: "10px 14px",
-              border: "1px solid #DDE1E7",
-              borderRadius: 8,
-              fontSize: 13,
-              color: "#374151",
-              outline: "none",
-              fontFamily: "inherit",
-              transition: "border-color 0.15s",
-            }}
-            onFocus={(e) => (e.target.style.borderColor = "#3A72D2")}
-            onBlur={(e) => (e.target.style.borderColor = "#DDE1E7")}
+            style={{ width: "100%", padding: "10px 14px", border: "1px solid #DDE1E7", borderRadius: 8, fontSize: 13, color: "#374151", outline: "none", fontFamily: "inherit" }}
           />
         </div>
 
-        {/* Kategori Barang */}
+        {/* Kategori */}
         <div style={{ marginBottom: 18 }}>
-          <label
-            style={{
-              display: "block",
-              fontSize: 13,
-              fontWeight: 600,
-              color: "#1E1F24",
-              marginBottom: 6,
-            }}
-          >
+          <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "#1E1F24", marginBottom: 6 }}>
             Kategori Barang
           </label>
           <div style={{ position: "relative" }}>
             <select
-              name="kategori"
-              value={form.kategori}
+              name="kategori_id"
+              value={form.kategori_id}
               onChange={handleChange}
-              style={{
-                width: "100%",
-                padding: "10px 40px 10px 14px",
-                border: "1px solid #DDE1E7",
-                borderRadius: 8,
-                fontSize: 13,
-                color: "#374151",
-                outline: "none",
-                fontFamily: "inherit",
-                background: "#fff",
-                appearance: "none",
-                transition: "border-color 0.15s",
-              }}
-              onFocus={(e) => (e.target.style.borderColor = "#3A72D2")}
-              onBlur={(e) => (e.target.style.borderColor = "#DDE1E7")}
+              style={{ width: "100%", padding: "10px 40px 10px 14px", border: "1px solid #DDE1E7", borderRadius: 8, fontSize: 13, color: "#374151", outline: "none", fontFamily: "inherit", background: "#fff", appearance: "none" }}
             >
               <option value="">Pilih Kategori Barang</option>
-              <option value="Fashion">Fashion</option>
-              <option value="Elektronik">Elektronik</option>
-              <option value="Makanan">Makanan</option>
-              <option value="Minuman">Minuman</option>
-              <option value="Lainnya">Lainnya</option>
+              {kategoriList.map((kat) => (
+                <option key={kat.id} value={kat.id}>{kat.nama_kategori}</option>
+              ))}
             </select>
-            <ChevronDown
-              size={18}
-              style={{
-                position: "absolute",
-                right: 14,
-                top: "50%",
-                transform: "translateY(-50%)",
-                color: "#374151",
-                pointerEvents: "none",
-              }}
-            />
+            <ChevronDown size={18} style={{ position: "absolute", right: 14, top: "50%", transform: "translateY(-50%)", color: "#374151", pointerEvents: "none" }} />
           </div>
+        </div>
+
+        {/* UBAH: Stok Barang */}
+        <div style={{ marginBottom: 18 }}>
+          <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "#1E1F24", marginBottom: 6 }}>
+            Stok Barang
+          </label>
+          <input
+            type="number"
+            name="stok"
+            value={form.stok}
+            onChange={handleChange}
+            placeholder="Masukkan jumlah stok"
+            min="0"
+            style={{ width: "100%", padding: "10px 14px", border: "1px solid #DDE1E7", borderRadius: 8, fontSize: 13, color: "#374151", outline: "none", fontFamily: "inherit" }}
+          />
         </div>
 
         {/* Deskripsi */}
         <div style={{ marginBottom: 18 }}>
-          <label
-            style={{
-              display: "block",
-              fontSize: 13,
-              fontWeight: 600,
-              color: "#1E1F24",
-              marginBottom: 6,
-            }}
-          >
+          <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "#1E1F24", marginBottom: 6 }}>
             Deskripsi
           </label>
           <div style={{ position: "relative" }}>
@@ -206,31 +144,9 @@ const TambahBarangModal = ({ isOpen, onClose, onSave }) => {
               placeholder="Masukkan deskripsi barang"
               rows={3}
               maxLength={200}
-              style={{
-                width: "100%",
-                padding: "10px 14px 26px 14px",
-                border: "1px solid #DDE1E7",
-                borderRadius: 8,
-                fontSize: 13,
-                color: "#374151",
-                outline: "none",
-                fontFamily: "inherit",
-                resize: "vertical",
-                transition: "border-color 0.15s",
-              }}
-              onFocus={(e) => (e.target.style.borderColor = "#3A72D2")}
-              onBlur={(e) => (e.target.style.borderColor = "#DDE1E7")}
+              style={{ width: "100%", padding: "10px 14px 26px 14px", border: "1px solid #DDE1E7", borderRadius: 8, fontSize: 13, color: "#374151", outline: "none", fontFamily: "inherit", resize: "vertical" }}
             />
-            <span
-              style={{
-                position: "absolute",
-                left: 14,
-                bottom: 8,
-                fontSize: 11,
-                color: "#9DA3AE",
-                pointerEvents: "none",
-              }}
-            >
+            <span style={{ position: "absolute", left: 14, bottom: 8, fontSize: 11, color: "#9DA3AE" }}>
               {form.deskripsi.length}/200
             </span>
           </div>
@@ -325,59 +241,9 @@ const TambahBarangModal = ({ isOpen, onClose, onSave }) => {
         </div>
 
         {/* Buttons */}
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "flex-end",
-            gap: 12,
-            paddingTop: 8,
-            borderTop: "1px solid #F0F1F3",
-          }}
-        >
-          <button
-            onClick={handleClose}
-            style={{
-              padding: "10px 24px",
-              background: "transparent",
-              border: "1px solid #DDE1E7",
-              borderRadius: 8,
-              fontSize: 13,
-              fontWeight: 500,
-              color: "#6B7280",
-              cursor: "pointer",
-              transition: "background 0.15s, border-color 0.15s",
-              fontFamily: "inherit",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = "#F4F5F7";
-              e.currentTarget.style.borderColor = "#C5CAD4";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = "transparent";
-              e.currentTarget.style.borderColor = "#DDE1E7";
-            }}
-          >
-            Batal
-          </button>
-          <button
-            onClick={handleSubmit}
-            style={{
-              padding: "10px 24px",
-              background: "#3A72D2",
-              border: "none",
-              borderRadius: 8,
-              fontSize: 13,
-              fontWeight: 600,
-              color: "#fff",
-              cursor: "pointer",
-              transition: "background 0.15s",
-              fontFamily: "inherit",
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.background = "#3569C1")}
-            onMouseLeave={(e) => (e.currentTarget.style.background = "#3A72D2")}
-          >
-            Tambah Barang
-          </button>
+         <div style={{ display: "flex", justifyContent: "flex-end", gap: 12, paddingTop: 8, borderTop: "1px solid #F0F1F3", marginTop: 24 }}>
+          <button onClick={handleClose} style={{ padding: "10px 24px", background: "transparent", border: "1px solid #DDE1E7", borderRadius: 8, fontSize: 13, fontWeight: 500, color: "#6B7280", cursor: "pointer" }}>Batal</button>
+          <button onClick={handleSubmit} style={{ padding: "10px 24px", background: "#3A72D2", border: "none", borderRadius: 8, fontSize: 13, fontWeight: 600, color: "#fff", cursor: "pointer" }}>Tambah Barang</button>
         </div>
       </div>
     </BaseModal>

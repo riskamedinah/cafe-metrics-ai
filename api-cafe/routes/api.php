@@ -16,6 +16,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::post('/logout', [AuthController::class, 'logout']);
 
+    Route::get('/dashboard', [PenjualanController::class, 'dashboardSummary']);
+
     // Kategori
     Route::get('/kategori', [KategoriController::class, 'index']);
     Route::post('/kategori', [KategoriController::class, 'store']);
@@ -25,10 +27,14 @@ Route::middleware('auth:sanctum')->group(function () {
     // Barang
     Route::get('/barang', [BarangController::class, 'index']);
     Route::post('/barang', [BarangController::class, 'store']);
+    Route::put('/barang/{id}', [BarangController::class, 'update']);     
+    Route::delete('/barang/{id}', [BarangController::class, 'destroy']);
 
     // Penjualan
     Route::get('/penjualan', [PenjualanController::class, 'index']);
     Route::post('/penjualan', [PenjualanController::class, 'store']);
+    Route::put('/penjualan/{id}', [PenjualanController::class, 'update']);
+    Route::delete('/penjualan/{id}', [PenjualanController::class, 'destroy']);
 
     // Ringkasan Bulanan
     Route::post('/ringkasan/hitung', [RingkasanBulananController::class, 'hitungStatistik']);

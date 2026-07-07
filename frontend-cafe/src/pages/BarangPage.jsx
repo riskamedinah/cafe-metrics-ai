@@ -1,13 +1,41 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import BarangCard from "../components/ui/BarangCard";
-import { mockBarang } from "../data/barangMock";
+// UBAH: import useData
+import { useData } from "../context/DataContext";
 
 export default function BarangPage() {
-  const [barang] = useState(mockBarang);
+  // UBAH: ambil data dari context
+  const { barang, fetchBarang, loadingBarang } = useData();
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchBarang();
+  }, []);
+
+  // UBAH: tidak perlu mapping lagi, tapi jika format BarangCard butuh properti spesifik, mapping disini
+  const dataBarang = barang
+    ? barang.map((item) => ({
+        id: item.id,
+        nama: item.nama_barang,
+        harga: item.harga_barang,
+        gambar: item.foto_barang || "/placeholder.svg",
+        kategori: item.kategori?.nama_kategori || "Tidak diketahui",
+        deskripsi: item.deskripsi_barang,
+      }))
+    : [];
 
   const handleBeli = (item) => {
     alert(`Beli: ${item.nama}`);
   };
+
+  // UBAH: loading dari context
+  if (loadingBarang && dataBarang.length === 0) {
+    return (
+      <div style={{ padding: 32, background: "#F4F5F7", minHeight: "100vh" }}>
+        <p className="text-gray-500 text-sm">Memuat data barang...</p>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -18,8 +46,6 @@ export default function BarangPage() {
         fontFamily: "'Geist Variable', 'Inter', sans-serif",
       }}
     >
-
-      {/* Grid */}
       <div
         style={{
           display: "grid",
@@ -27,7 +53,7 @@ export default function BarangPage() {
           gap: "20px",
         }}
       >
-        {barang.map((item) => (
+        {dataBarang.map((item) => (
           <BarangCard key={item.id} item={item} onBeli={handleBeli} />
         ))}
       </div>

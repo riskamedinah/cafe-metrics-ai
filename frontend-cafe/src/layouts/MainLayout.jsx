@@ -193,11 +193,11 @@ const Topbar = ({ onMenuClick }) => {
           </div>
 
           {/* Name & email */}
-          <div className="hidden sm:block text-right">
-            <p className="text-sm font-semibold text-gray-800 leading-tight">
+          <div className="hidden sm:block">
+            <p className="text-base font-semibold text-gray-800 leading-tight">
               {user?.name ?? 'User'}
             </p>
-            <p className="text-xs text-gray-400 leading-tight">
+            <p className="text-sm text-gray-600 leading-tight">
               {user?.email ?? ''}
             </p>
           </div>

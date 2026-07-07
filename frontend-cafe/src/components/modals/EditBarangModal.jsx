@@ -2,12 +2,13 @@ import React, { useState, useEffect } from "react";
 import { FilePlus, ChevronDown } from "lucide-react";
 import BaseModal from "../ui/BaseModal";
 
-const EditBarangModal = ({ isOpen, onClose, onSave, data }) => {
+const EditBarangModal = ({ isOpen, onClose, onSave, data, kategoriList = [] }) => {
   const [form, setForm] = useState({
     id: "",
     nama: "",
     harga: "",
-    kategori: "",
+    kategori_id: "",
+    stok: "", // UBAH: tambah stok
     deskripsi: "",
     gambar: "",
   });
@@ -21,7 +22,8 @@ const EditBarangModal = ({ isOpen, onClose, onSave, data }) => {
         id: data.id,
         nama: data.nama || "",
         harga: data.harga ? data.harga.toString() : "",
-        kategori: data.kategori || "",
+        kategori_id: data.kategori_id || "",
+        stok: data.stok != null ? data.stok.toString() : "", // UBAH
         deskripsi: data.deskripsi || "",
         gambar: data.gambar || "",
       });
@@ -36,35 +38,23 @@ const EditBarangModal = ({ isOpen, onClose, onSave, data }) => {
   };
 
   const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      if (file.size > 2 * 1024 * 1024) {
-        alert("Ukuran gambar maksimal 2MB");
-        return;
-      }
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setFilePreview(reader.result);
-        setForm((prev) => ({ ...prev, gambar: reader.result }));
-      };
-      reader.readAsDataURL(file);
-      setFileName(file.name);
-    }
+    // abaikan
   };
 
   const handleSubmit = () => {
-    if (!form.nama || !form.harga || !form.kategori) {
-      alert("Nama, Harga, dan Kategori wajib diisi.");
+    if (!form.nama || !form.harga || !form.kategori_id || form.stok === "") {
+      alert("Nama, Harga, Kategori, dan Stok wajib diisi.");
       return;
     }
     onSave({
       ...form,
       harga: parseFloat(form.harga.replace(/\./g, "")) || 0,
+      stok: parseInt(form.stok, 10) || 0,
     });
   };
 
   const handleClose = () => {
-    setForm({ id: "", nama: "", harga: "", kategori: "", deskripsi: "", gambar: "" });
+    setForm({ id: "", nama: "", harga: "", kategori_id: "", stok: "", deskripsi: "", gambar: "" });
     setFilePreview(null);
     setFileName("");
     onClose();
@@ -73,152 +63,44 @@ const EditBarangModal = ({ isOpen, onClose, onSave, data }) => {
   return (
     <BaseModal isOpen={isOpen} onClose={handleClose} title="Edit Barang">
       <div style={{ padding: "24px" }}>
-        {/* Nama Barang */}
+        {/* Nama */}
         <div style={{ marginBottom: 18 }}>
-          <label
-            style={{ display: "block", fontSize: 13, fontWeight: 600, color: "#1E1F24", marginBottom: 6 }}
-          >
-            Nama Barang
-          </label>
-          <input
-            type="text"
-            name="nama"
-            value={form.nama}
-            onChange={handleChange}
-            style={{
-              width: "100%",
-              padding: "10px 14px",
-              border: "1px solid #DDE1E7",
-              borderRadius: 8,
-              fontSize: 13,
-              color: "#374151",
-              outline: "none",
-              fontFamily: "inherit",
-              transition: "border-color 0.15s",
-            }}
-            onFocus={(e) => (e.target.style.borderColor = "#3A72D2")}
-            onBlur={(e) => (e.target.style.borderColor = "#DDE1E7")}
-          />
+          <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "#1E1F24", marginBottom: 6 }}>Nama Barang</label>
+          <input type="text" name="nama" value={form.nama} onChange={handleChange} style={{ width: "100%", padding: "10px 14px", border: "1px solid #DDE1E7", borderRadius: 8, fontSize: 13 }} />
         </div>
 
-        {/* Harga Barang */}
+        {/* Harga */}
         <div style={{ marginBottom: 18 }}>
-          <label
-            style={{ display: "block", fontSize: 13, fontWeight: 600, color: "#1E1F24", marginBottom: 6 }}
-          >
-            Harga Barang
-          </label>
-          <input
-            type="text"
-            name="harga"
-            value={form.harga}
-            onChange={handleChange}
-            style={{
-              width: "100%",
-              padding: "10px 14px",
-              border: "1px solid #DDE1E7",
-              borderRadius: 8,
-              fontSize: 13,
-              color: "#374151",
-              outline: "none",
-              fontFamily: "inherit",
-              transition: "border-color 0.15s",
-            }}
-            onFocus={(e) => (e.target.style.borderColor = "#3A72D2")}
-            onBlur={(e) => (e.target.style.borderColor = "#DDE1E7")}
-          />
+          <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "#1E1F24", marginBottom: 6 }}>Harga Barang</label>
+          <input type="text" name="harga" value={form.harga} onChange={handleChange} style={{ width: "100%", padding: "10px 14px", border: "1px solid #DDE1E7", borderRadius: 8, fontSize: 13 }} />
         </div>
 
-        {/* Kategori Barang */}
+        {/* Kategori */}
         <div style={{ marginBottom: 18 }}>
-          <label
-            style={{ display: "block", fontSize: 13, fontWeight: 600, color: "#1E1F24", marginBottom: 6 }}
-          >
-            Kategori Barang
-          </label>
+          <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "#1E1F24", marginBottom: 6 }}>Kategori Barang</label>
           <div style={{ position: "relative" }}>
-            <select
-              name="kategori"
-              value={form.kategori}
-              onChange={handleChange}
-              style={{
-                width: "100%",
-                padding: "10px 40px 10px 14px",
-                border: "1px solid #DDE1E7",
-                borderRadius: 8,
-                fontSize: 13,
-                color: "#374151",
-                outline: "none",
-                fontFamily: "inherit",
-                background: "#fff",
-                appearance: "none",
-                transition: "border-color 0.15s",
-              }}
-              onFocus={(e) => (e.target.style.borderColor = "#3A72D2")}
-              onBlur={(e) => (e.target.style.borderColor = "#DDE1E7")}
-            >
+            <select name="kategori_id" value={form.kategori_id} onChange={handleChange} style={{ width: "100%", padding: "10px 40px 10px 14px", border: "1px solid #DDE1E7", borderRadius: 8, fontSize: 13, background: "#fff", appearance: "none" }}>
               <option value="">Pilih Kategori Barang</option>
-              <option value="Fashion">Fashion</option>
-              <option value="Elektronik">Elektronik</option>
-              <option value="Makanan">Makanan</option>
-              <option value="Minuman">Minuman</option>
-              <option value="Lainnya">Lainnya</option>
+              {kategoriList.map((kat) => (
+                <option key={kat.id} value={kat.id}>{kat.nama_kategori}</option>
+              ))}
             </select>
-            <ChevronDown
-              size={18}
-              style={{
-                position: "absolute",
-                right: 14,
-                top: "50%",
-                transform: "translateY(-50%)",
-                color: "#374151",
-                pointerEvents: "none",
-              }}
-            />
+            <ChevronDown size={18} style={{ position: "absolute", right: 14, top: "50%", transform: "translateY(-50%)", color: "#374151", pointerEvents: "none" }} />
           </div>
+        </div>
+
+        {/* UBAH: Stok Barang */}
+        <div style={{ marginBottom: 18 }}>
+          <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "#1E1F24", marginBottom: 6 }}>Stok Barang</label>
+          <input type="number" name="stok" value={form.stok} onChange={handleChange} placeholder="Masukkan jumlah stok" min="0" style={{ width: "100%", padding: "10px 14px", border: "1px solid #DDE1E7", borderRadius: 8, fontSize: 13 }} />
         </div>
 
         {/* Deskripsi */}
         <div style={{ marginBottom: 18 }}>
-          <label
-            style={{ display: "block", fontSize: 13, fontWeight: 600, color: "#1E1F24", marginBottom: 6 }}
-          >
-            Deskripsi
-          </label>
+          <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "#1E1F24", marginBottom: 6 }}>Deskripsi</label>
           <div style={{ position: "relative" }}>
-            <textarea
-              name="deskripsi"
-              value={form.deskripsi}
-              onChange={handleChange}
-              rows={3}
-              maxLength={200}
-              style={{
-                width: "100%",
-                padding: "10px 14px 26px 14px",
-                border: "1px solid #DDE1E7",
-                borderRadius: 8,
-                fontSize: 13,
-                color: "#374151",
-                outline: "none",
-                fontFamily: "inherit",
-                resize: "vertical",
-                transition: "border-color 0.15s",
-              }}
-              onFocus={(e) => (e.target.style.borderColor = "#3A72D2")}
-              onBlur={(e) => (e.target.style.borderColor = "#DDE1E7")}
-            />
-            <span
-              style={{
-                position: "absolute",
-                left: 14,
-                bottom: 8,
-                fontSize: 11,
-                color: "#9DA3AE",
-                pointerEvents: "none",
-              }}
-            >
-              {form.deskripsi.length}/200
-            </span>
+            <textarea name="deskripsi" value={form.deskripsi} onChange={handleChange} rows={3} maxLength={200} style={{ width: "100%", padding: "10px 14px 26px 14px", border: "1px solid #DDE1E7", borderRadius: 8, fontSize: 13 }} />
+            <span style={{ position: "absolute", left: 14, bottom: 8, fontSize: 11, color: "#9DA3AE" }}>{form.deskripsi.length}/200</span>
           </div>
         </div>
 
@@ -286,59 +168,9 @@ const EditBarangModal = ({ isOpen, onClose, onSave, data }) => {
         </div>
 
         {/* Buttons */}
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "flex-end",
-            gap: 12,
-            paddingTop: 8,
-            borderTop: "1px solid #F0F1F3",
-          }}
-        >
-          <button
-            onClick={handleClose}
-            style={{
-              padding: "10px 24px",
-              background: "transparent",
-              border: "1px solid #DDE1E7",
-              borderRadius: 8,
-              fontSize: 13,
-              fontWeight: 500,
-              color: "#6B7280",
-              cursor: "pointer",
-              transition: "background 0.15s, border-color 0.15s",
-              fontFamily: "inherit",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = "#F4F5F7";
-              e.currentTarget.style.borderColor = "#C5CAD4";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = "transparent";
-              e.currentTarget.style.borderColor = "#DDE1E7";
-            }}
-          >
-            Batal
-          </button>
-          <button
-            onClick={handleSubmit}
-            style={{
-              padding: "10px 24px",
-              background: "#3A72D2",
-              border: "none",
-              borderRadius: 8,
-              fontSize: 13,
-              fontWeight: 600,
-              color: "#fff",
-              cursor: "pointer",
-              transition: "background 0.15s",
-              fontFamily: "inherit",
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.background = "#3569C1")}
-            onMouseLeave={(e) => (e.currentTarget.style.background = "#3A72D2")}
-          >
-            Update Barang
-          </button>
+       <div style={{ display: "flex", justifyContent: "flex-end", gap: 12, paddingTop: 8, borderTop: "1px solid #F0F1F3", marginTop: 24 }}>
+          <button onClick={handleClose} style={{ padding: "10px 24px", background: "transparent", border: "1px solid #DDE1E7", borderRadius: 8, fontSize: 13 }}>Batal</button>
+          <button onClick={handleSubmit} style={{ padding: "10px 24px", background: "#3A72D2", border: "none", borderRadius: 8, fontSize: 13, fontWeight: 600, color: "#fff" }}>Update Barang</button>
         </div>
       </div>
     </BaseModal>

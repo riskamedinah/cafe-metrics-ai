@@ -1,24 +1,13 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
+  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from "recharts";
 import { Package, TrendingDown, ShoppingCart, Wallet } from "lucide-react";
 import TabelPenjualan from "../components/ui/TabelPenjualan";
-import { STAT_CARDS, CHART_DATA, DASHBOARD_TABLE_DATA } from "../data/DashboardMock";
+// UBAH: tidak perlu import api, pakai useData
+import { useData } from "../context/DataContext";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
-
-const formatShortRupiah = (value) => {
-  if (value >= 1000000) return `${(value / 1000000).toFixed(1)}jt`;
-  if (value >= 1000) return `${(value / 1000).toFixed(0)}rb`;
-  return value.toString();
-};
 
 const formatRupiah = (value) =>
   new Intl.NumberFormat("id-ID", {
@@ -63,7 +52,30 @@ const StatCard = ({ label, value, icon: Icon }) => (
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 const DashboardPage = () => {
-  const [tableData, setTableData] = useState(DASHBOARD_TABLE_DATA);
+  // UBAH: gunakan useData
+  const { dashboard, fetchDashboard, loadingDashboard } = useData();
+
+  useEffect(() => {
+    fetchDashboard();
+  }, []);
+
+  // UBAH: loading state & data
+  if (loadingDashboard || !dashboard) {
+    return (
+      <div className="dashboard-root" style={{ padding: 32 }}>
+        Memuat dashboard...
+      </div>
+    );
+  }
+
+  const { stats, chart, table } = dashboard;
+
+  const statCards = [
+    { id: 1, label: "Total Produk", value: stats.totalProduk.toString(), icon: Package },
+    { id: 2, label: "Kategori", value: stats.totalKategori.toString(), icon: TrendingDown },
+    { id: 3, label: "Total Penjualan", value: stats.totalPenjualan.toString(), icon: ShoppingCart },
+    { id: 4, label: "Pendapatan", value: formatRupiah(stats.totalPendapatan), icon: Wallet },
+  ];
 
   return (
     <>
@@ -219,19 +231,18 @@ const DashboardPage = () => {
         }
       `}</style>
 
-      <div className="dashboard-root">
-        {/* ── Stat Cards ── */}
+ <div className="dashboard-root">
         <div className="stat-grid">
-          {STAT_CARDS.map((card) => (
+          {statCards.map((card) => (
             <StatCard key={card.id} {...card} />
           ))}
         </div>
 
-        {/* ── Chart Panel ── */}
         <div className="panel">
           <p className="panel-title">Grafik Penjualan Dan Total Harga</p>
-          <p className="panel-subtitle">Januari 2026</p>
-
+          <p className="panel-subtitle">
+            {new Date().toLocaleDateString("id-ID", { month: "long", year: "numeric" })}
+          </p>
           <div className="chart-legend">
             <span className="legend-item">
               <span className="legend-dot" style={{ background: "#3B5BDB" }} />
@@ -242,100 +253,40 @@ const DashboardPage = () => {
               Total Harga
             </span>
           </div>
-
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <div
-              style={{
-                writingMode: "vertical-rl",
-                transform: "rotate(180deg)",
-                fontSize: 11,
-                color: "#9A9BAA",
-                whiteSpace: "nowrap",
-                flexShrink: 0,
-              }}
-            >
+            <div style={{ writingMode: "vertical-rl", transform: "rotate(180deg)", fontSize: 11, color: "#9A9BAA", whiteSpace: "nowrap", flexShrink: 0 }}>
               Total Penjualan
             </div>
-
             <div className="chart-wrap" style={{ flex: 1 }}>
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={CHART_DATA} margin={{ top: 8, right: 24, left: 0, bottom: 0 }}>
+                <LineChart data={chart} margin={{ top: 8, right: 24, left: 0, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#F1F2F6" vertical={false} />
-                  <XAxis
-                    dataKey="minggu"
-                    tick={{ fontSize: 12, fill: "#9A9BAA" }}
-                    axisLine={false}
-                    tickLine={false}
-                  />
-                  <YAxis
-                    yAxisId="left"
-                    tick={{ fontSize: 12, fill: "#9A9BAA" }}
-                    axisLine={false}
-                    tickLine={false}
-                    width={28}
-                    domain={[0, 5]}
-                    ticks={[0, 1, 2, 3, 4, 5]}
-                  />
-                  <YAxis
-                    yAxisId="right"
-                    orientation="right"
-                    tick={{ fontSize: 12, fill: "#9A9BAA" }}
-                    axisLine={false}
-                    tickLine={false}
-                    width={48}
-                    domain={[0, 400000]}
-                    ticks={[0, 100000, 200000, 300000, 400000]}
-                    tickFormatter={(v) => {
-                      if (v >= 1000000) return `${(v / 1000000).toFixed(0)}jt`;
-                      if (v >= 1000) return `${(v / 1000).toFixed(0)}rb`;
-                      return v.toString();
-                    }}
-                  />
+                  <XAxis dataKey="minggu" tick={{ fontSize: 12, fill: "#9A9BAA" }} axisLine={false} tickLine={false} />
+                  <YAxis yAxisId="left" tick={{ fontSize: 12, fill: "#9A9BAA" }} axisLine={false} tickLine={false} width={28} domain={[0, 5]} ticks={[0, 1, 2, 3, 4, 5]} />
+                  <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 12, fill: "#9A9BAA" }} axisLine={false} tickLine={false} width={48} domain={[0, 400000]} ticks={[0, 100000, 200000, 300000, 400000]} tickFormatter={(v) => {
+                    if (v >= 1000000) return `${(v / 1000000).toFixed(0)}jt`;
+                    if (v >= 1000) return `${(v / 1000).toFixed(0)}rb`;
+                    return v.toString();
+                  }} />
                   <Tooltip content={<CustomTooltip />} />
-                  <Line
-                    yAxisId="left"
-                    type="linear"
-                    dataKey="totalPenjualan"
-                    stroke="#3B5BDB"
-                    strokeWidth={2}
-                    dot={{ r: 4, fill: "white", stroke: "#3B5BDB", strokeWidth: 2 }}
-                    activeDot={{ r: 6, fill: "white", stroke: "#3451C7", strokeWidth: 2.5 }}
-                    isAnimationActive={false}
-                  />
-                  <Line
-                    yAxisId="right"
-                    type="linear"
-                    dataKey="totalHarga"
-                    stroke="#94A3B8"
-                    strokeWidth={2}
-                    strokeDasharray="6 4"
-                    dot={{ r: 4, fill: "white", stroke: "#94A3B8", strokeWidth: 2 }}
-                    activeDot={{ r: 6, fill: "white", stroke: "#64748B", strokeWidth: 2.5 }}
-                    isAnimationActive={false}
-                  />
+                  <Line yAxisId="left" type="linear" dataKey="totalPenjualan" stroke="#3B5BDB" strokeWidth={2} dot={{ r: 4, fill: "white", stroke: "#3B5BDB", strokeWidth: 2 }} activeDot={{ r: 6, fill: "white", stroke: "#3451C7", strokeWidth: 2.5 }} isAnimationActive={false} />
+                  <Line yAxisId="right" type="linear" dataKey="totalHarga" stroke="#94A3B8" strokeWidth={2} strokeDasharray="6 4" dot={{ r: 4, fill: "white", stroke: "#94A3B8", strokeWidth: 2 }} activeDot={{ r: 6, fill: "white", stroke: "#64748B", strokeWidth: 2.5 }} isAnimationActive={false} />
                 </LineChart>
               </ResponsiveContainer>
             </div>
-
-            <div
-              style={{
-                writingMode: "vertical-rl",
-                fontSize: 11,
-                color: "#9A9BAA",
-                whiteSpace: "nowrap",
-                flexShrink: 0,
-              }}
-            >
+            <div style={{ writingMode: "vertical-rl", fontSize: 11, color: "#9A9BAA", whiteSpace: "nowrap", flexShrink: 0 }}>
               Total Harga
             </div>
           </div>
         </div>
 
-        {/* ── Table Panel (pake komponen TabelPenjualan) ── */}
         <div className="panel">
           <TabelPenjualan 
-            data={tableData} 
-            onDataChange={setTableData} 
+            data={table} 
+            onDataChange={() => {
+              // Jika ada perubahan di tabel (tambah/edit/hapus), refresh dashboard
+              fetchDashboard(true);
+            }} 
           />
         </div>
       </div>
