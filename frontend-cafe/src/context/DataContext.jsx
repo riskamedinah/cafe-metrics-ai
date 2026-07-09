@@ -55,7 +55,8 @@ export const DataProvider = ({ children }) => {
       if (res.data.status) {
         const raw = res.data.data.data || res.data.data;
         const mapped = raw.map((item) => ({
-          id: item.id,
+           id: item.id,                     
+          barangId: item.barang_id,  
           namaProduk: item.barang?.nama_barang || "Tidak diketahui",
           harga: item.barang?.harga_barang || 0,
           jumlah: item.jumlah,
@@ -131,6 +132,7 @@ export const DataProvider = ({ children }) => {
         const raw = penRes.data.data.data || penRes.data.data;
         table = raw.map((item) => ({
           id: item.id,
+           barangId: item.barang_id,
           namaProduk: item.barang?.nama_barang || "Tidak diketahui",
           harga: item.barang?.harga_barang || 0,
           jumlah: item.jumlah,

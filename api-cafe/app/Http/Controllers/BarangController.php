@@ -7,6 +7,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\QueryException; 
+use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 
 class BarangController extends Controller
 {
@@ -45,13 +46,13 @@ class BarangController extends Controller
         ]);
 
         $fotoPath = null;
-        if ($request->hasFile('foto_barang')) {
-           $uploaded = cloudinary()->upload(
-                $request->file('foto_barang')->getRealPath(),
-                ['folder' => 'cafe_metrics']
-            );
-            $fotoPath = $uploaded->getSecurePath();
-        }
+    if ($request->hasFile('foto_barang')) {
+        $uploadResult = Cloudinary::uploadApi()->upload(  
+            $request->file('foto_barang')->getRealPath(),
+            ['folder' => 'cafe_metrics']
+        );
+        $fotoPath = $uploadResult['secure_url'];           
+    }
 
         $barang = Barang::create([
             'kategori_id' => $validated['kategori_id'],
@@ -89,6 +90,7 @@ public function update(Request $request, int $id): JsonResponse
         ], 404);
     }
 
+    // Validasi dulu
     $validated = $request->validate([
         'kategori_id' => 'required|exists:kategoris,id',
         'nama_barang' => 'required|string|max:255',
@@ -98,15 +100,22 @@ public function update(Request $request, int $id): JsonResponse
         'foto_barang' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
     ]);
 
-    // Upload foto baru jika ada
+    // Proses upload jika ada file baru
     if ($request->hasFile('foto_barang')) {
-        $uploaded = cloudinary()->upload(
+        // Hapus foto lama dari Cloudinary jika ada
+        if ($barang->foto_public_id) {
+            Cloudinary::uploadApi()->destroy($barang->foto_public_id);
+        }
+
+        $uploadResult = Cloudinary::uploadApi()->upload(
             $request->file('foto_barang')->getRealPath(),
             ['folder' => 'cafe_metrics']
         );
-        $barang->foto_barang = $uploaded->getSecurePath();
+        $barang->foto_barang = $uploadResult['secure_url'];
+        $barang->foto_public_id = $uploadResult['public_id'];
     }
 
+    // Update data barang
     $barang->update([
         'kategori_id' => $validated['kategori_id'],
         'nama_barang' => $validated['nama_barang'],
@@ -142,9 +151,12 @@ public function destroy(int $id): JsonResponse
     }
 
     try {
+        if ($barang->foto_public_id) {
+            Cloudinary::uploadApi()->destroy($barang->foto_public_id);
+        }
+
         $barang->delete();
     } catch (QueryException $e) {
-        // Cek apakah error karena foreign key constraint
         if ($e->getCode() == 23000) {
             return response()->json([
                 'status' => false,
@@ -152,7 +164,7 @@ public function destroy(int $id): JsonResponse
                 'data' => null,
             ], 422);
         }
-        throw $e; // lempar error lain jika bukan 23000
+        throw $e;
     }
 
     return response()->json([
@@ -161,5 +173,4 @@ public function destroy(int $id): JsonResponse
         'data' => null,
     ]);
 }
-
 }

@@ -7,6 +7,7 @@ import EditPenjualanModal from "../components/modals/EditPenjualanModal";
 import HapusPenjualanModal from "../components/modals/HapusPenjualanModal";
 import api from "../lib/axios";
 import { useData } from "../context/DataContext";
+import LoadingState from "../components/ui/LoadingState";
 
 const bulanIni = () => {
   const d = new Date();
@@ -130,9 +131,9 @@ export default function ManagementPenjualan() {
         <h2 className="text-base font-semibold text-neutral-900">Riwayat Penjualan</h2>
         <p className="mb-5 text-sm text-neutral-400">{bulanIni()}</p>
 
-        {loadingPenjualan && data.length === 0 ? (
-          <p className="text-gray-500 text-sm">Memuat data...</p>
-        ) : (
+       {loadingPenjualan && data.length === 0 ? (
+         <LoadingState text="Memuat data penjualan..." />
+       ) : (
           <BaseTable
             columns={columns}
             data={filteredData}

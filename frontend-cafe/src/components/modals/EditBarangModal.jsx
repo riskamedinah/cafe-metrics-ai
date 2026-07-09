@@ -2,19 +2,66 @@ import React, { useState, useEffect } from "react";
 import { FilePlus, ChevronDown } from "lucide-react";
 import BaseModal from "../ui/BaseModal";
 
+// 🔹 Fungsi kompresi gambar (sama persis dengan TambahBarangModal)
+const compressImage = (file) => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        let width = img.width;
+        let height = img.height;
+        const MAX_WIDTH = 800;
+
+        if (width > MAX_WIDTH) {
+          height = (height * MAX_WIDTH) / width;
+          width = MAX_WIDTH;
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, width, height);
+
+        canvas.toBlob(
+          (blob) => {
+            if (blob) {
+              const compressedFile = new File([blob], file.name, {
+                type: "image/jpeg",
+                lastModified: Date.now(),
+              });
+              resolve(compressedFile);
+            } else {
+              reject(new Error("Canvas toBlob gagal"));
+            }
+          },
+          "image/jpeg",
+          0.7
+        );
+      };
+      img.onerror = reject;
+      img.src = e.target.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+};
+
 const EditBarangModal = ({ isOpen, onClose, onSave, data, kategoriList = [] }) => {
   const [form, setForm] = useState({
     id: "",
     nama: "",
     harga: "",
     kategori_id: "",
-    stok: "", // UBAH: tambah stok
+    stok: "",
     deskripsi: "",
-    gambar: "",
   });
 
   const [filePreview, setFilePreview] = useState(null);
   const [fileName, setFileName] = useState("");
+  const [selectedFile, setSelectedFile] = useState(null); // file baru (jika diganti)
+  const [isCompressing, setIsCompressing] = useState(false);
 
   useEffect(() => {
     if (data) {
@@ -23,12 +70,12 @@ const EditBarangModal = ({ isOpen, onClose, onSave, data, kategoriList = [] }) =
         nama: data.nama || "",
         harga: data.harga ? data.harga.toString() : "",
         kategori_id: data.kategori_id || "",
-        stok: data.stok != null ? data.stok.toString() : "", // UBAH
+        stok: data.stok != null ? data.stok.toString() : "",
         deskripsi: data.deskripsi || "",
-        gambar: data.gambar || "",
       });
       setFilePreview(data.gambar || null);
       setFileName(data.gambar ? data.gambar.split("/").pop() : "");
+      setSelectedFile(null); // reset file baru setiap buka modal
     }
   }, [data]);
 
@@ -37,8 +84,36 @@ const EditBarangModal = ({ isOpen, onClose, onSave, data, kategoriList = [] }) =
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleFileChange = (e) => {
-    // abaikan
+  const handleFileChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (file.size > 10 * 1024 * 1024) {
+      alert("Ukuran gambar maksimal 10MB sebelum dikompresi.");
+      return;
+    }
+
+    setIsCompressing(true);
+    try {
+      const compressed = await compressImage(file);
+      if (compressed.size > 2 * 1024 * 1024) {
+        alert("Gambar masih terlalu besar setelah kompresi, pilih gambar lain.");
+        setIsCompressing(false);
+        return;
+      }
+
+      setSelectedFile(compressed);
+      setFileName(compressed.name);
+
+      const previewReader = new FileReader();
+      previewReader.onloadend = () => setFilePreview(previewReader.result);
+      previewReader.readAsDataURL(compressed);
+    } catch (err) {
+      alert("Gagal mengompresi gambar.");
+      console.error(err);
+    } finally {
+      setIsCompressing(false);
+    }
   };
 
   const handleSubmit = () => {
@@ -46,17 +121,27 @@ const EditBarangModal = ({ isOpen, onClose, onSave, data, kategoriList = [] }) =
       alert("Nama, Harga, Kategori, dan Stok wajib diisi.");
       return;
     }
-    onSave({
-      ...form,
-      harga: parseFloat(form.harga.replace(/\./g, "")) || 0,
-      stok: parseInt(form.stok, 10) || 0,
-    });
+
+    const formData = new FormData();
+    formData.append("nama_barang", form.nama);
+    formData.append("harga_barang", parseFloat(form.harga.replace(/\./g, "")) || 0);
+    formData.append("kategori_id", form.kategori_id);
+    formData.append("stok_barang", parseInt(form.stok, 10) || 0);
+    formData.append("deskripsi_barang", form.deskripsi || "");
+    if (selectedFile) {
+      formData.append("foto_barang", selectedFile);
+    }
+    // Untuk method PUT, Laravel kadang perlu _method (opsional)
+    formData.append("_method", "PUT");
+
+    onSave({ id: form.id, formData });
   };
 
   const handleClose = () => {
-    setForm({ id: "", nama: "", harga: "", kategori_id: "", stok: "", deskripsi: "", gambar: "" });
+    setForm({ id: "", nama: "", harga: "", kategori_id: "", stok: "", deskripsi: "" });
     setFilePreview(null);
     setFileName("");
+    setSelectedFile(null);
     onClose();
   };
 
@@ -89,7 +174,7 @@ const EditBarangModal = ({ isOpen, onClose, onSave, data, kategoriList = [] }) =
           </div>
         </div>
 
-        {/* UBAH: Stok Barang */}
+        {/* Stok */}
         <div style={{ marginBottom: 18 }}>
           <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "#1E1F24", marginBottom: 6 }}>Stok Barang</label>
           <input type="number" name="stok" value={form.stok} onChange={handleChange} placeholder="Masukkan jumlah stok" min="0" style={{ width: "100%", padding: "10px 14px", border: "1px solid #DDE1E7", borderRadius: 8, fontSize: 13 }} />
@@ -104,71 +189,33 @@ const EditBarangModal = ({ isOpen, onClose, onSave, data, kategoriList = [] }) =
           </div>
         </div>
 
-        {/* Foto Barang */}
+        {/* Upload Foto + Kompresi */}
         <div style={{ marginBottom: 24 }}>
-          <label
-            style={{ display: "block", fontSize: 13, fontWeight: 600, color: "#1E1F24", marginBottom: 6 }}
-          >
-            Foto Barang
-          </label>
+          <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "#1E1F24", marginBottom: 6 }}>Foto Barang</label>
           <div
-            style={{
-              border: "1px dashed #DDE1E7",
-              borderRadius: 8,
-              padding: "28px 20px",
-              textAlign: "center",
-              cursor: "pointer",
-              transition: "border-color 0.15s",
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.borderColor = "#3A72D2")}
-            onMouseLeave={(e) => (e.currentTarget.style.borderColor = "#DDE1E7")}
+            style={{ border: "1px dashed #DDE1E7", borderRadius: 8, padding: "28px 20px", textAlign: "center", cursor: "pointer", transition: "border-color 0.15s" }}
             onClick={() => document.getElementById("fileInputEdit").click()}
           >
-            <div
-              style={{
-                width: 48,
-                height: 48,
-                borderRadius: "50%",
-                background: "#3A72D2",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                margin: "0 auto 16px",
-              }}
-            >
+            <div style={{ width: 48, height: 48, borderRadius: "50%", background: "#3A72D2", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
               <FilePlus size={22} color="#fff" />
             </div>
-            <div style={{ fontSize: 14, fontWeight: 600, color: "#1E1F24", marginBottom: 4 }}>
-              Klik Atau Seret Untuk Mengunggah
-            </div>
-            <div style={{ fontSize: 12, color: "#9DA3AE" }}>
-              • Maksimal gambar 2mb
-            </div>
-            <input
-              id="fileInputEdit"
-              type="file"
-              accept="image/*"
-              onChange={handleFileChange}
-              style={{ display: "none" }}
-            />
+            <div style={{ fontSize: 14, fontWeight: 600, color: "#1E1F24", marginBottom: 4 }}>Klik Atau Seret Untuk Mengunggah</div>
+            <div style={{ fontSize: 12, color: "#9DA3AE" }}>• Maksimal 2MB setelah kompresi</div>
+            <input id="fileInputEdit" type="file" accept="image/*" onChange={handleFileChange} style={{ display: "none" }} />
           </div>
+
+          {isCompressing && <p style={{ marginTop: 8, fontSize: 12, color: "#6B7280" }}>Mengompresi gambar...</p>}
 
           {filePreview && (
             <div style={{ marginTop: 16 }}>
-              <img
-                src={filePreview}
-                alt="Preview"
-                style={{ maxHeight: 70, maxWidth: "100%", objectFit: "contain", display: "block" }}
-              />
-              <span style={{ display: "block", fontSize: 12, color: "#6B7280", marginTop: 8 }}>
-                {fileName}
-              </span>
+              <img src={filePreview} alt="Preview" style={{ maxHeight: 70, maxWidth: "100%", objectFit: "contain", display: "block" }} />
+              <span style={{ display: "block", fontSize: 12, color: "#6B7280", marginTop: 8 }}>{fileName}</span>
             </div>
           )}
         </div>
 
         {/* Buttons */}
-       <div style={{ display: "flex", justifyContent: "flex-end", gap: 12, paddingTop: 8, borderTop: "1px solid #F0F1F3", marginTop: 24 }}>
+        <div style={{ display: "flex", justifyContent: "flex-end", gap: 12, paddingTop: 8, borderTop: "1px solid #F0F1F3", marginTop: 24 }}>
           <button onClick={handleClose} style={{ padding: "10px 24px", background: "transparent", border: "1px solid #DDE1E7", borderRadius: 8, fontSize: 13 }}>Batal</button>
           <button onClick={handleSubmit} style={{ padding: "10px 24px", background: "#3A72D2", border: "none", borderRadius: 8, fontSize: 13, fontWeight: 600, color: "#fff" }}>Update Barang</button>
         </div>

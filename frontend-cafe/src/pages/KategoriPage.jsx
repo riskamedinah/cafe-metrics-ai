@@ -6,9 +6,9 @@ import TambahKategoriModal from "../components/modals/TambahKategoriModal";
 import EditKategoriModal from "../components/modals/EditKategoriModal";
 import HapusKategoriModal from "../components/modals/HapusKategoriModal";
 import CreateButton from "../components/ui/CreateButton";
-// UBAH: import useData
 import { useData } from "../context/DataContext";
 import api from "../lib/axios";
+import LoadingState from "../components/ui/LoadingState";
 
 const bulanIni = () => {
   const d = new Date();
@@ -98,9 +98,9 @@ const KategoriPage = () => {
         <h2 className="text-base font-semibold text-neutral-900">Tabel Data Kategori</h2>
         <p className="mb-5 text-sm text-neutral-400">{bulanIni()}</p>
 
-        {loadingKategori && data.length === 0 ? (
-          <p className="text-gray-500 text-sm">Memuat data...</p>
-        ) : (
+       {loadingKategori && data.length === 0 ? (
+         <LoadingState text="Memuat data kategori..." />
+       ) : (
           <BaseTable
             columns={columns}
             data={filteredData}

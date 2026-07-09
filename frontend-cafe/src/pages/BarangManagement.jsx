@@ -7,6 +7,8 @@ import EditBarangModal from "../components/modals/EditBarangModal";
 import HapusBarangModal from "../components/modals/HapusBarangModal";
 import api from "../lib/axios";
 import { useData } from "../context/DataContext";
+import { useLocation } from 'react-router-dom';
+import LoadingState from "../components/ui/LoadingState";
 
 const BULAN = [
   "Januari", "Februari", "Maret", "April", "Mei", "Juni",
@@ -23,6 +25,8 @@ const ManagementBarang = () => {
     loadingBarang,
   } = useData();
 
+   const location = useLocation();
+
   const [searchQuery, setSearchQuery] = useState("");
   const [modalTambah, setModalTambah] = useState(false);
   const [modalEdit, setModalEdit] = useState(false);
@@ -37,6 +41,29 @@ const ManagementBarang = () => {
     fetchKategori();
   }, []);
 
+   useEffect(() => {
+    if (location.state?.openEditModal || location.state?.openHapusModal) {
+      const { openEditModal, openHapusModal, barangId } = location.state;
+      const target = (barang || []).find(b => b.id === barangId);
+      if (target) {
+        const itemForModal = {
+          id: target.id,
+          nama: target.nama_barang,
+          harga: target.harga_barang,
+          kategori_id: target.kategori_id,
+          stok: target.stok_barang,
+          deskripsi: target.deskripsi_barang,
+          gambar: target.foto_barang,
+        };
+        setSelectedItem(itemForModal);
+        if (openEditModal) setModalEdit(true);
+        if (openHapusModal) setModalHapus(true);
+      }
+      // Bersihkan state agar tidak berulang
+      window.history.replaceState({}, document.title);
+    }
+     }, [location, barang]);
+
   const data = barang || [];
   const kategoriList = kategori || []; // UBAH: untuk dioper ke modal
 
@@ -45,56 +72,36 @@ const ManagementBarang = () => {
     item.nama_barang?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // ❌ HAPUS fungsi getKategoriId, tidak diperlukan lagi
-
-  // Tambah barang (UBAH: pakai kategori_id langsung)
-  const handleTambah = async (newItem) => {
-    const payload = {
-      nama_barang: newItem.nama,
-      harga_barang: parseInt(newItem.harga, 10),
-      kategori_id: newItem.kategori_id, // UBAH: langsung pakai id dari modal
-      stok_barang: newItem.stok,
-      deskripsi_barang: newItem.deskripsi || "",
-    };
-
-    try {
-      const res = await api.post("/barang", payload);
-      if (res.data.status) {
-        refreshBarang();
-        setModalTambah(false);
-      } else {
-        alert(res.data.message || "Gagal menambah barang");
-      }
-    } catch (err) {
-      alert(err.response?.data?.message || "Gagal menyimpan ke server");
+ const handleTambah = async (formData) => {
+  try {
+    const res = await api.post("/barang", formData);
+    if (res.data.status) {
+      refreshBarang();
+      setModalTambah(false);
+    } else {
+      alert(res.data.message || "Gagal menambah barang");
     }
-  };
+  } catch (err) {
+    alert(err.response?.data?.message || "Gagal menyimpan ke server");
+  }
+};
 
-  // Edit barang (UBAH: pakai kategori_id langsung)
-  const handleEdit = async (updatedItem) => {
-    const payload = {
-      nama_barang: updatedItem.nama,
-      harga_barang: parseInt(updatedItem.harga, 10),
-      kategori_id: updatedItem.kategori_id, // UBAH
-      stok_barang: updatedItem.stok,
-      deskripsi_barang: updatedItem.deskripsi || "",
-    };
-
-    try {
-      const res = await api.put(`/barang/${updatedItem.id}`, payload);
-      if (res.data.status) {
-        refreshBarang();
-        setModalEdit(false);
-        setSelectedItem(null);
-      } else {
-        alert(res.data.message || "Gagal mengupdate barang");
-      }
-    } catch (err) {
-      alert(err.response?.data?.message || "Gagal menyimpan perubahan");
+  const handleEdit = async ({ id, formData }) => {
+  try {
+    const res = await api.post(`/barang/${id}`, formData);
+    if (res.data.status) {
+      refreshBarang();
+      setModalEdit(false);
+      setSelectedItem(null);
+    } else {
+      alert(res.data.message || "Gagal mengupdate barang");
     }
-  };
+  } catch (err) {
+    console.log('Edit error:', err.response?.data);
+    alert(err.response?.data?.message || "Gagal menyimpan perubahan");
+  }
+};
 
-  // Hapus barang
   const handleHapus = async () => {
     if (!selectedItem) return;
     try {
@@ -192,9 +199,9 @@ const ManagementBarang = () => {
         <h2 className="text-base font-semibold text-neutral-900">Tabel Data Barang</h2>
         <p className="mb-5 text-sm text-neutral-400">{periode}</p>
 
-        {loadingBarang && data.length === 0 ? (
-          <p className="text-gray-500 text-sm">Memuat data...</p>
-        ) : (
+       {loadingBarang && data.length === 0 ? (
+  <LoadingState text="Memuat data barang..." />
+) : (
           <BaseTable
             columns={columns}
             data={filteredData}

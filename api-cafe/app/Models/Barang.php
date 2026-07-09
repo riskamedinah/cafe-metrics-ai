@@ -14,7 +14,8 @@ class Barang extends Model
        'harga_barang',
        'stok_barang',
        'deskripsi_barang',
-       'foto_barang'
+       'foto_barang',
+       'foto_public_id',
    ];
 
    protected $appends = ['foto_url'];

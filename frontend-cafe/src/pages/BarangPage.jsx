@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import BarangCard from "../components/ui/BarangCard";
-// UBAH: import useData
 import { useData } from "../context/DataContext";
+import LoadingState from "../components/ui/LoadingState";
 
 export default function BarangPage() {
   // UBAH: ambil data dari context
@@ -28,14 +28,13 @@ export default function BarangPage() {
     alert(`Beli: ${item.nama}`);
   };
 
-  // UBAH: loading dari context
-  if (loadingBarang && dataBarang.length === 0) {
-    return (
-      <div style={{ padding: 32, background: "#F4F5F7", minHeight: "100vh" }}>
-        <p className="text-gray-500 text-sm">Memuat data barang...</p>
-      </div>
-    );
-  }
+if (loadingBarang && dataBarang.length === 0) {
+  return (
+    <div style={{ padding: 32, background: "#F4F5F7", minHeight: "100vh" }}>
+      <LoadingState text="Memuat data barang..." />
+    </div>
+  );
+}
 
   return (
     <div

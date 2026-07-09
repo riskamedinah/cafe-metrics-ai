@@ -3,8 +3,8 @@ import { Eye } from "lucide-react";
 import BaseSearch from "../components/ui/BaseSearch";
 import BaseTable from "../components/ui/BaseTable";
 import RingkasanBulananModal from "../components/modals/RingkasanBulananModal";
-// UBAH: import useData
 import { useData } from "../context/DataContext";
+import LoadingState from "../components/ui/LoadingState";
 
 const BULAN = [
   "Januari", "Februari", "Maret", "April", "Mei", "Juni",
@@ -17,7 +17,6 @@ const bulanIni = () => {
 };
 
 export default function RingkasanBulananPage() {
-  // UBAH: gunakan context
   const { ringkasan, fetchRingkasan, loadingRingkasan } = useData();
   const [search, setSearch] = useState("");
   const [selectedItem, setSelectedItem] = useState(null);
@@ -75,7 +74,7 @@ export default function RingkasanBulananPage() {
         <p className="mb-5 text-sm text-neutral-400">{bulanIni()}</p>
 
         {loadingRingkasan && data.length === 0 ? (
-          <p className="text-gray-500 text-sm">Memuat data...</p>
+          <LoadingState text="Memuat data ringkasan bulanan..." />
         ) : (
           <BaseTable columns={columns} data={filteredData} actionRow={actionRow} emptyMessage="Tidak ada data ringkasan." />
         )}

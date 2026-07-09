@@ -6,6 +6,8 @@ import { Package, TrendingDown, ShoppingCart, Wallet } from "lucide-react";
 import TabelPenjualan from "../components/ui/TabelPenjualan";
 // UBAH: tidak perlu import api, pakai useData
 import { useData } from "../context/DataContext";
+import { useNavigate } from 'react-router-dom';
+import LoadingState from "../components/ui/LoadingState";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -52,21 +54,20 @@ const StatCard = ({ label, value, icon: Icon }) => (
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 const DashboardPage = () => {
-  // UBAH: gunakan useData
+   const navigate = useNavigate();
   const { dashboard, fetchDashboard, loadingDashboard } = useData();
 
   useEffect(() => {
     fetchDashboard();
   }, []);
 
-  // UBAH: loading state & data
-  if (loadingDashboard || !dashboard) {
-    return (
-      <div className="dashboard-root" style={{ padding: 32 }}>
-        Memuat dashboard...
-      </div>
-    );
-  }
+if (loadingDashboard || !dashboard) {
+  return (
+    <div className="dashboard-root" style={{ padding: "28px 32px", background: "#F4F5F7", minHeight: "100vh" }}>
+      <LoadingState text="Memuat dashboard..." />
+    </div>
+  );
+}
 
   const { stats, chart, table } = dashboard;
 
@@ -281,13 +282,19 @@ const DashboardPage = () => {
         </div>
 
         <div className="panel">
-          <TabelPenjualan 
-            data={table} 
-            onDataChange={() => {
-              // Jika ada perubahan di tabel (tambah/edit/hapus), refresh dashboard
-              fetchDashboard(true);
-            }} 
-          />
+        <TabelPenjualan
+    data={table}
+    onEditBarang={(item) => {
+      navigate('/barang-management', {
+        state: { openEditModal: true, barangId: item.barangId }
+      });
+    }}
+    onHapusBarang={(item) => {
+      navigate('/barang-management', {
+        state: { openHapusModal: true, barangId: item.barangId }
+      });
+    }}
+  />  
         </div>
       </div>
     </>
