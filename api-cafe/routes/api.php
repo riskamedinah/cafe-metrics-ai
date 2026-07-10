@@ -40,5 +40,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/ringkasan/hitung', [RingkasanBulananController::class, 'hitungStatistik']);
     Route::get('/ringkasan', [RingkasanBulananController::class, 'index']);
     Route::post('/ringkasan', [RingkasanBulananController::class, 'store']);
+    Route::post('/generate-ai', [RingkasanBulananController::class, 'generateAi']);
 
 });

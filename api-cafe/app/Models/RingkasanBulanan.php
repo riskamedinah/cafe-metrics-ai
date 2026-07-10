@@ -10,6 +10,7 @@ class RingkasanBulanan extends Model
         'user_id',
         'bulan',
         'tahun',
+          'total_penjualan', 
         'total_omzet',
         'total_item_terjual',
         'analisis_ai'

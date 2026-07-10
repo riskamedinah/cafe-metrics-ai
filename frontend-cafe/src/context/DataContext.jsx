@@ -85,7 +85,7 @@ export const DataProvider = ({ children }) => {
             "Juli","Agustus","September","Oktober","November","Desember"
           ][item.bulan - 1] || "Tidak diketahui",
           tahun: item.tahun,
-          totalPenjualan: 0,
+          totalPenjualan: item.total_penjualan,
           totalPendapatan: item.total_omzet,
           ringkasanAI: item.analisis_ai || "",
         }));

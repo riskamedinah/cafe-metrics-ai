@@ -7,6 +7,8 @@ use App\Models\RingkasanBulanan;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class RingkasanBulananController extends Controller
 {
@@ -40,6 +42,7 @@ class RingkasanBulananController extends Controller
 
         $totalOmzet = $penjualans->sum('total_harga');
         $totalItemTerjual = $penjualans->sum('jumlah');
+        $totalPenjualan = $penjualans->count();
 
         $top3 = $penjualans
             ->groupBy('barang_id')
@@ -70,6 +73,7 @@ class RingkasanBulananController extends Controller
             'data' => [
                 'bulan' => $bulan,
                 'tahun' => $tahun,
+                'total_penjualan' => $totalPenjualan,
                 'total_omzet' => $totalOmzet,
                 'total_item_terjual' => $totalItemTerjual,
                 'top_3_terlaris' => $top3,
@@ -104,6 +108,7 @@ class RingkasanBulananController extends Controller
         $validated = $request->validate([
             'bulan' => 'required|integer|min:1|max:12',
             'tahun' => 'required|integer|min:2000',
+            'total_penjualan' => 'required|integer|min:0',
             'total_omzet' => 'required|integer|min:0',
             'total_item_terjual' => 'required|integer|min:0',
             'analisis_ai' => 'required|string',
@@ -113,6 +118,7 @@ class RingkasanBulananController extends Controller
             'user_id' => Auth::id(),
             'bulan' => $validated['bulan'],
             'tahun' => $validated['tahun'],
+            'total_penjualan' => $validated['total_penjualan'],
             'total_omzet' => $validated['total_omzet'],
             'total_item_terjual' => $validated['total_item_terjual'],
             'analisis_ai' => $validated['analisis_ai'],
@@ -124,6 +130,97 @@ class RingkasanBulananController extends Controller
             'data' => $ringkasan,
         ], 201);
     }
+
+  public function generateAi(Request $request): JsonResponse
+{
+    $validated = $request->validate([
+        'raw_data_ai' => 'required|string',
+    ]);
+
+    $apiKey = env('GEMINI_API_KEY');
+    if (!$apiKey) {
+        return response()->json(['status' => false, 'message' => 'Gemini API key tidak ditemukan'], 500);
+    }
+
+    // 1. Kunci prompt agar fokus ke angka dan stok produk saja
+    $prompt = "Kamu adalah sistem analisis data penjualan yang kaku, objektif, dan hanya fokus pada angka. Tugasmu adalah meringkas data transaksi yang diberikan.\n\n" .
+              "ATURAN KETAT:\n" .
+              "1. DILARANG MEMBERIKAN SARAN STRATEGIS/BISNIS DI LUAR DATA (Jangan menyuruh mengubah konsep bisnis, melakukan survei, mengevaluasi toko, atau memberi saran promosi makro).\n" .
+              "2. Fokus Rekomendasi HANYA boleh seputar manajemen stok produk yang nyata-nyata ada di dalam data (misal: naikkan stok produk terlaris, amankan pasokan, atau pantau item yang kurang laku).\n" .
+              "3. Jangan berasumsi tentang jenis toko jika tidak disebutkan di data. Cukup sebutkan performa produknya.\n" .
+              "4. Gunakan bahasa Indonesia yang formal, ringkas, dan langsung ke inti angka transaksi.\n\n" .
+              "DATA TRANSAKSI UNTUK DIANALISIS:\n" . $validated['raw_data_ai'] . "\n\n" .
+              "Balas dengan JSON valid dengan format tepat seperti ini:\n" .
+              "{\n" .
+              "  \"ringkasan\": \"Teks ringkasan performa omzet dan total item terjual...\",\n" .
+              "  \"rekomendasi\": [\"Rekomendasi stok produk terlaris...\", \"Rekomendasi evaluasi stok item lainnya...\"],\n" .
+              "  \"analisis_tren\": \"Teks analisis perbandingan kuantitas antar produk berdasarkan data tersebut...\"\n" .
+              "}\n\n" .
+              "Hanya kembalikan JSON, tanpa teks penjelasan lain di luar JSON.";
+
+    // 2. Gunakan model Gemini 3.1 Flash Lite yang kuotanya aktif
+    $model = 'gemini-3.1-flash-lite'; 
+
+    try {
+        $response = Http::retry(2, 3000)
+            ->post("https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key={$apiKey}", [
+                'contents' => [
+                    [
+                        'parts' => [
+                            ['text' => $prompt]
+                        ]
+                    ]
+                ],
+                'generationConfig' => [
+                    'temperature' => 0.0, // Dipaksa 0.0 agar jawaban kaku dan patuh pada prompt
+                    'responseMimeType' => 'application/json', // Memaksa server Gemini merespons format JSON murni
+                ],
+            ]);
+
+        if ($response->failed()) {
+            Log::error('Gemini API failed', [
+                'status' => $response->status(),
+                'body' => $response->body(),
+            ]);
+            return response()->json([
+                'status' => false,
+                'message' => 'Gemini API error',
+                'detail' => $response->json()['error']['message'] ?? 'No detail',
+            ], 500);
+        }
+
+        $result = $response->json();
+        $text = $result['candidates'][0]['content']['parts'][0]['text'] ?? null;
+        if (!$text) {
+            return response()->json(['status' => false, 'message' => 'Respons AI kosong'], 500);
+        }
+
+        // 3. Bersihkan pembungkus markdown jika AI tidak sengaja menyertakannya
+        $text = trim($text);
+        if (preg_match('/```json\s*(.*?)\s*```/s', $text, $matches)) {
+            $text = $matches[1];
+        }
+        
+        $aiData = json_decode($text, true);
+        if (!$aiData || !isset($aiData['ringkasan'])) {
+            return response()->json(['status' => false, 'message' => 'Format respons AI tidak valid'], 500);
+        }
+
+        // 4. Return data bersih ke frontend (React/Flutter/Blade) siap pakai di UI kamu
+        return response()->json([
+            'status' => true,
+            'message' => 'Analisis AI berhasil',
+            'data' => [
+                'ringkasan' => $aiData['ringkasan'],
+                'rekomendasi' => $aiData['rekomendasi'] ?? [],
+                'analisis_tren' => $aiData['analisis_tren'] ?? '',
+            ],
+        ]);
+    } catch (\Exception $e) {
+        Log::error('Gemini exception: ' . $e->getMessage());
+        return response()->json(['status' => false, 'message' => 'Gagal menghubungi Gemini'], 500);
+    }
+}
 
     /**
      * HELPER METHOD: Mengubah Angka Bulan ke String Bahasa Indonesia
