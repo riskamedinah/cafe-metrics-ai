@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Sparkles, Package, Info, TrendingUp, Save } from "lucide-react";
 import api from "../lib/axios";
+import { useToast } from "../components/ui/Notification";
 import { useData } from "../context/DataContext";
 
 const bulanSekarang = new Date().getMonth() + 1;
@@ -24,6 +25,7 @@ const formatAnalisisAI = ({ detail, rekomendasi = [], analisisTren }) => {
 };
 
 const GenerateRingkasanPage = () => {
+  const toast = useToast();
   const [bulan, setBulan] = useState(bulanSekarang);
   const [tahun, setTahun] = useState(tahunSekarang);
   const [loading, setLoading] = useState(false);
@@ -34,77 +36,70 @@ const GenerateRingkasanPage = () => {
 
   const { refreshRingkasan } = useData();
 
-  const handleGenerate = async () => {
-    setLoading(true);
-    setError("");
-    try {
-      // 1. Hitung statistik bulanan
-      const res = await api.post("/ringkasan/hitung", { bulan, tahun });
-      if (!res.data.status) {
-        setError(res.data.message || "Gagal menghitung statistik");
-        setLoading(false);
-        return;
-      }
-      const data = res.data.data;
-      setRawData(data);
-
-      // 2. Panggil Gemini untuk analisis
-      const aiRes = await api.post("/generate-ai", {
-        raw_data_ai: data.raw_data_ai,
-      });
-      if (aiRes.data.status) {
-        const ai = aiRes.data.data;
-        setRingkasan({
-          detail: ai.ringkasan,
-          rekomendasi: ai.rekomendasi,
-          analisisTren: ai.analisis_tren,
-        });
-      } else {
-        // Fallback kalau Gemini gagal
-        setRingkasan({
-          detail: `Total omzet bulan ini Rp ${data.total_omzet.toLocaleString('id-ID')} dengan ${data.total_item_terjual} item terjual.`,
-          rekomendasi: ["Coba lagi nanti"],
-          analisisTren: "Data tidak dapat dianalisis oleh AI.",
-        });
-      }
-    } catch (err) {
-      setError(err.response?.data?.message || "Terjadi kesalahan");
-    } finally {
+ const handleGenerate = async () => {
+  setLoading(true);
+  setError("");
+  try {
+    const res = await api.post("/ringkasan/hitung", { bulan, tahun });
+    if (!res.data.status) {
+      toast.error("Gagal menghitung statistik", res.data.message);
       setLoading(false);
+      return;
     }
-  };
+    const data = res.data.data;
+    setRawData(data);
 
-  const handleSave = async () => {
-    if (!rawData) return;
-    setSaving(true);
-    try {
-      // Gabungkan semua konten AI menjadi satu teks bersih (bukan JSON)
-      const analisisAi = formatAnalisisAI(ringkasan);
-
-      const res = await api.post("/ringkasan", {
-        bulan: rawData.bulan,
-        tahun: rawData.tahun,
-        total_penjualan: rawData.total_penjualan,
-        total_omzet: rawData.total_omzet,
-        total_item_terjual: rawData.total_item_terjual,
-        analisis_ai: analisisAi,
+    const aiRes = await api.post("/generate-ai", { raw_data_ai: data.raw_data_ai });
+    if (aiRes.data.status) {
+      const ai = aiRes.data.data;
+      setRingkasan({
+        detail: ai.ringkasan,
+        rekomendasi: ai.rekomendasi,
+        analisisTren: ai.analisis_tren,
       });
-
-      if (res.data.status) {
-        alert("Ringkasan berhasil disimpan!");
-        refreshRingkasan(); // perbarui daftar di halaman RingkasanBulanan
-        // Reset form (opsional)
-        setRingkasan(null);
-        setRawData(null);
-      } else {
-        alert(res.data.message || "Gagal menyimpan ringkasan");
-      }
-    } catch (err) {
-      alert(err.response?.data?.message || "Gagal menyimpan");
-    } finally {
-      setSaving(false);
+    } else {
+      toast.warning("AI tidak merespons", "Menampilkan ringkasan dasar dari data statistik");
+      setRingkasan({
+        detail: `Total omzet bulan ini Rp ${data.total_omzet.toLocaleString('id-ID')} dengan ${data.total_item_terjual} item terjual.`,
+        rekomendasi: ["Coba lagi nanti"],
+        analisisTren: "Data tidak dapat dianalisis oleh AI.",
+      });
     }
-  };
+  } catch (err) {
+    toast.error("Terjadi kesalahan", err.response?.data?.message);
+  } finally {
+    setLoading(false);
+  }
+};
+
+const handleSave = async () => {
+  if (!rawData) return;
+  setSaving(true);
+  try {
+    const analisisAi = formatAnalisisAI(ringkasan);
+    const res = await api.post("/ringkasan", {
+      bulan: rawData.bulan,
+      tahun: rawData.tahun,
+      total_penjualan: rawData.total_penjualan,
+      total_omzet: rawData.total_omzet,
+      total_item_terjual: rawData.total_item_terjual,
+      analisis_ai: analisisAi,
+    });
+
+    if (res.data.status) {
+      toast.success("Ringkasan disimpan", "Data berhasil disimpan");
+      refreshRingkasan();
+      setRingkasan(null);
+      setRawData(null);
+    } else {
+      toast.error("Gagal menyimpan ringkasan", res.data.message);
+    }
+  } catch (err) {
+    toast.error("Gagal menyimpan", err.response?.data?.message);
+  } finally {
+    setSaving(false);
+  }
+};
 
   const handleReset = () => {
     setRingkasan(null);

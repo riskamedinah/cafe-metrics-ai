@@ -17,7 +17,7 @@ class KategoriController extends Controller
      */
    public function index(): JsonResponse
     {
-        $kategoris = Kategori::where('user_id', Auth::id())->get();
+        $kategoris = Kategori::where('user_id', Auth::id())->latest()->get();
 
         return response()->json([
             'status' => true,

@@ -7,6 +7,7 @@ import EditKategoriModal from "../components/modals/EditKategoriModal";
 import HapusKategoriModal from "../components/modals/HapusKategoriModal";
 import CreateButton from "../components/ui/CreateButton";
 import { useData } from "../context/DataContext";
+import { useToast } from "../components/ui/Notification";
 import api from "../lib/axios";
 import LoadingState from "../components/ui/LoadingState";
 
@@ -18,6 +19,7 @@ const bulanIni = () => {
 const KategoriPage = () => {
   // UBAH: gunakan context
   const { kategori, fetchKategori, refreshKategori, loadingKategori } = useData();
+  const toast = useToast()
   const [searchQuery, setSearchQuery] = useState("");
   const [modalTambah, setModalTambah] = useState(false);
   const [editItem, setEditItem] = useState(null);
@@ -38,15 +40,15 @@ const KategoriPage = () => {
     try {
       const res = await api.post("/kategori", { nama_kategori: nama });
       if (res.data.status) {
-        // UBAH: refresh data global
         refreshKategori();
         setModalTambah(false);
-      } else {
-        alert(res.data.message || "Gagal menambah kategori");
-      }
-    } catch (err) {
-      alert(err.response?.data?.message || "Gagal menyimpan ke server");
+      toast.success("Kategori ditambahkan", `"${nama}" berhasil disimpan`);
+    } else {
+      toast.error("Gagal menambah kategori", res.data.message);
     }
+  } catch (err) {
+    toast.error("Gagal menyimpan", err.response?.data?.message || "Terjadi kesalahan pada server");
+  }
   };
 
   const handleEdit = async (updated) => {
@@ -55,30 +57,30 @@ const KategoriPage = () => {
         nama_kategori: updated.nama,
       });
       if (res.data.status) {
-        // UBAH: refresh global
         refreshKategori();
         setEditItem(null);
-      } else {
-        alert(res.data.message || "Gagal mengupdate kategori");
-      }
-    } catch (err) {
-      alert(err.response?.data?.message || "Gagal menyimpan perubahan");
+      toast.success("Kategori diperbarui", `"${updated.nama}" berhasil diubah`);
+    } else {
+      toast.error("Gagal mengupdate kategori", res.data.message);
     }
+  } catch (err) {
+    toast.error("Gagal menyimpan perubahan", err.response?.data?.message);
+  }
   };
 
   const handleHapus = async (id) => {
     try {
       const res = await api.delete(`/kategori/${id}`);
       if (res.data.status) {
-        // UBAH: refresh global
         refreshKategori();
         setHapusItem(null);
-      } else {
-        alert(res.data.message || "Gagal menghapus kategori");
-      }
-    } catch (err) {
-      alert(err.response?.data?.message || "Gagal menghapus kategori");
+    toast.success("Kategori dihapus", "Data berhasil dihapus");
+    } else {
+      toast.error("Gagal menghapus kategori", res.data.message);
     }
+  } catch (err) {
+    toast.error("Gagal menghapus kategori", err.response?.data?.message);
+  }
   };
 
   const columns = [{ header: "Kategori", key: "nama_kategori" }];

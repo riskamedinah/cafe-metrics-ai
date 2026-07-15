@@ -6,6 +6,7 @@ import TambahBarangModal from "../components/modals/TambahBarangModal";
 import EditBarangModal from "../components/modals/EditBarangModal";
 import HapusBarangModal from "../components/modals/HapusBarangModal";
 import api from "../lib/axios";
+import { useToast } from "../components/ui/Notification";
 import { useData } from "../context/DataContext";
 import { useLocation } from 'react-router-dom';
 import LoadingState from "../components/ui/LoadingState";
@@ -27,6 +28,7 @@ const ManagementBarang = () => {
 
    const location = useLocation();
 
+   const toast = useToast();
   const [searchQuery, setSearchQuery] = useState("");
   const [modalTambah, setModalTambah] = useState(false);
   const [modalEdit, setModalEdit] = useState(false);
@@ -78,45 +80,48 @@ const ManagementBarang = () => {
     if (res.data.status) {
       refreshBarang();
       setModalTambah(false);
+      toast.success("Barang ditambahkan", "Data berhasil disimpan");
     } else {
-      alert(res.data.message || "Gagal menambah barang");
+      toast.error("Gagal menambah barang", res.data.message);
     }
   } catch (err) {
-    alert(err.response?.data?.message || "Gagal menyimpan ke server");
+    toast.error("Gagal menyimpan ke server", err.response?.data?.message);
   }
 };
 
-  const handleEdit = async ({ id, formData }) => {
+const handleEdit = async ({ id, formData }) => {
   try {
     const res = await api.post(`/barang/${id}`, formData);
     if (res.data.status) {
       refreshBarang();
       setModalEdit(false);
       setSelectedItem(null);
+      toast.success("Barang diperbarui", "Perubahan berhasil disimpan");
     } else {
-      alert(res.data.message || "Gagal mengupdate barang");
+      toast.error("Gagal mengupdate barang", res.data.message);
     }
   } catch (err) {
     console.log('Edit error:', err.response?.data);
-    alert(err.response?.data?.message || "Gagal menyimpan perubahan");
+    toast.error("Gagal menyimpan perubahan", err.response?.data?.message);
   }
 };
 
-  const handleHapus = async () => {
-    if (!selectedItem) return;
-    try {
-      const res = await api.delete(`/barang/${selectedItem.id}`);
-      if (res.data.status) {
-        refreshBarang();
-        setModalHapus(false);
-        setSelectedItem(null);
-      } else {
-        alert(res.data.message || "Gagal menghapus barang");
-      }
-    } catch (err) {
-      alert(err.response?.data?.message || "Gagal menghapus barang");
+const handleHapus = async () => {
+  if (!selectedItem) return;
+  try {
+    const res = await api.delete(`/barang/${selectedItem.id}`);
+    if (res.data.status) {
+      refreshBarang();
+      setModalHapus(false);
+      setSelectedItem(null);
+      toast.success("Barang dihapus", "Data berhasil dihapus");
+    } else {
+      toast.error("Gagal menghapus barang", res.data.message);
     }
-  };
+  } catch (err) {
+    toast.error("Gagal menghapus barang", err.response?.data?.message);
+  }
+};
 
   // Buka modal edit (UBAH: kirim kategori_id agar dropdown terisi)
   const openEditModal = (item) => {

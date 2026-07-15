@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
-import { Plus, SquarePen, Trash2 } from "lucide-react";
+import { SquarePen, Trash2 } from "lucide-react";
 import BaseSearch from "../components/ui/BaseSearch";
 import BaseTable from "../components/ui/BaseTable";
-import TambahPenjualanModal from "../components/modals/TambahPenjualanModal";
 import EditPenjualanModal from "../components/modals/EditPenjualanModal";
 import HapusPenjualanModal from "../components/modals/HapusPenjualanModal";
 import api from "../lib/axios";
+import { useToast } from "../components/ui/Notification";
 import { useData } from "../context/DataContext";
 import LoadingState from "../components/ui/LoadingState";
 
@@ -15,9 +15,9 @@ const bulanIni = () => {
 };
 
 export default function ManagementPenjualan() {
+  const toast = useToast();
   const { penjualan, fetchPenjualan, refreshPenjualan, loadingPenjualan } = useData();
   const [search, setSearch] = useState("");
-  const [modalTambah, setModalTambah] = useState(false);
   const [editItem, setEditItem] = useState(null);
   const [hapusItem, setHapusItem] = useState(null);
 
@@ -31,50 +31,33 @@ export default function ManagementPenjualan() {
     item.namaProduk.toLowerCase().includes(search.toLowerCase())
   );
 
-  // Handle tambah
-  const handleTambah = async (form) => {
-    try {
-      const res = await api.post("/penjualan", form);
-      if (res.data.status) {
-        refreshPenjualan();
-        setModalTambah(false);
-      } else {
-        alert(res.data.message);
-      }
-    } catch (err) {
-      alert(err.response?.data?.message || "Gagal menyimpan");
-    }
-  };
-
-  // Handle edit
   const handleEdit = async (updated) => {
     try {
-      const res = await api.put(`/penjualan/${updated.id}`, {
-        jumlah: updated.jumlah,
-      });
+      const res = await api.put(`/penjualan/${updated.id}`, { jumlah: updated.jumlah });
       if (res.data.status) {
         refreshPenjualan();
         setEditItem(null);
+        toast.success("Penjualan diperbarui", "Jumlah berhasil diubah");
       } else {
-        alert(res.data.message);
+        toast.error("Gagal memperbarui penjualan", res.data.message);
       }
     } catch (err) {
-      alert(err.response?.data?.message || "Gagal mengupdate");
+      toast.error("Gagal menyimpan perubahan", err.response?.data?.message || "Terjadi kesalahan pada server");
     }
   };
 
-  // Handle hapus
   const handleHapus = async (id) => {
     try {
       const res = await api.delete(`/penjualan/${id}`);
       if (res.data.status) {
         refreshPenjualan();
         setHapusItem(null);
+        toast.success("Penjualan dihapus", "Data berhasil dihapus");
       } else {
-        alert(res.data.message);
+        toast.error("Gagal menghapus penjualan", res.data.message);
       }
     } catch (err) {
-      alert(err.response?.data?.message || "Gagal menghapus");
+      toast.error("Gagal menghapus penjualan", err.response?.data?.message || "Terjadi kesalahan pada server");
     }
   };
 
@@ -118,22 +101,15 @@ export default function ManagementPenjualan() {
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Cari Penjualan"
         />
-        <button
-          onClick={() => setModalTambah(true)}
-          className="flex items-center gap-2 rounded-lg bg-[#3B5BDB] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#3451C7]"
-        >
-          <Plus size={18} strokeWidth={2} />
-          Tambah Penjualan
-        </button>
       </div>
 
       <div className="bg-white rounded-xl p-6 shadow-sm">
         <h2 className="text-base font-semibold text-neutral-900">Riwayat Penjualan</h2>
         <p className="mb-5 text-sm text-neutral-400">{bulanIni()}</p>
 
-       {loadingPenjualan && data.length === 0 ? (
-         <LoadingState text="Memuat data penjualan..." />
-       ) : (
+        {loadingPenjualan && data.length === 0 ? (
+          <LoadingState text="Memuat data penjualan..." />
+        ) : (
           <BaseTable
             columns={columns}
             data={filteredData}
@@ -142,12 +118,6 @@ export default function ManagementPenjualan() {
           />
         )}
       </div>
-
-      <TambahPenjualanModal
-        isOpen={modalTambah}
-        onClose={() => setModalTambah(false)}
-        onSave={handleTambah}
-      />
 
       {editItem && (
         <EditPenjualanModal

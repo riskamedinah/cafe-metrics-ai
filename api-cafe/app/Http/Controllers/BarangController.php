@@ -20,6 +20,7 @@ class BarangController extends Controller
    {
         $barang = Barang::with('kategori')
             ->where('user_id', Auth::id())
+            ->latest() 
             ->get();
 
         return response()->json([
