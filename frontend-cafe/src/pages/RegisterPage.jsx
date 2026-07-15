@@ -22,11 +22,11 @@ const RegisterPage = () => {
   const [error, setError] = useState('')
   const [errors, setErrors] = useState({})
 
-   useEffect(() => {
+  useEffect(() => {
     if (formRef.current) {
       formRef.current.scrollIntoView({
-        behavior: 'smooth', 
-        block: 'center', 
+        behavior: 'smooth',
+        block: 'center',
       })
     }
   }, [])
@@ -42,7 +42,7 @@ const RegisterPage = () => {
     setLoading(true)
     setError('')
     setErrors({})
-    
+
     try {
       const res = await api.post('/register', form)
       if (res.data.status) {
@@ -64,26 +64,23 @@ const RegisterPage = () => {
 
   return (
     <AuthLayout>
-        <div ref={formRef} className="w-full max-w-xl">  
-      <div className="w-full max-w-xl">  
+      <div ref={formRef} className="w-full max-w-lg">
         {/* Header */}
-        <div className="text-center mb-8">
-          <h2 className="text-3xl font-medium text-gray-900">Register</h2> 
-          <p className="text-gray-500 text-base mt-1">
+        <div className="text-center mb-6">
+          <h2 className="text-2xl font-medium text-gray-900">Register</h2>
+          <p className="text-gray-500 text-md mt-1">
             Isi nama, email, dan password untuk membuat akun Anda.
           </p>
         </div>
 
-        {/* Pemberitahuan Error */}
         {error && (
-          <div className="mb-4 px-4 py-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-base"> 
+          <div className="mb-4 px-4 py-1.5 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
             {error}
           </div>
         )}
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-5">
-          <InputField 
+        <form onSubmit={handleSubmit} className="space-y-3">
+          <InputField
             label="Nama"
             name="name"
             type="text"
@@ -93,7 +90,7 @@ const RegisterPage = () => {
             error={errors.name?.[0]}
           />
 
-          <InputField 
+          <InputField
             label="Email"
             name="email"
             type="email"
@@ -104,7 +101,7 @@ const RegisterPage = () => {
             required
           />
 
-          <PasswordField 
+          <PasswordField
             name="password"
             value={form.password}
             onChange={handleChange}
@@ -113,20 +110,17 @@ const RegisterPage = () => {
             required
           />
 
-          {/* Submit Button */}
           <Button type="submit" loading={loading}>
             Register
           </Button>
         </form>
 
-        {/* Link to Login */}
-        <p className="text-center text-base text-gray-500 mt-6">
+        <p className="text-center text-sm text-gray-500 mt-5">
           Sudah punya akun?{' '}
           <Link to="/login" className="text-[#3B5BDB] font-medium hover:underline">
             Masuk sekarang.
           </Link>
         </p>
-      </div>
       </div>
     </AuthLayout>
   )
