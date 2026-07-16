@@ -83,7 +83,7 @@ const TambahPenjualanModal = ({ isOpen, onClose, onSave }) => {
       <div style={{ height: "1px", background: "#F0F1F3" }} />
       <div style={{ padding: "16px 24px", display: "flex", justifyContent: "flex-end", gap: 10 }}>
         <button onClick={onClose} style={{ padding: "9px 20px", background: "#fff", border: "1px solid #DDE1E7", borderRadius: 8 }}>Batal</button>
-        <button onClick={handleSubmit} style={{ padding: "9px 20px", background: "#3B5BDB", color: "#fff", border: "none", borderRadius: 8 }}>Simpan</button>
+        <button onClick={handleSubmit} style={{ padding: "9px 20px", background: "#3A72D4", color: "#fff", border: "none", borderRadius: 8 }}>Simpan</button>
       </div>
     </BaseModal>
   );

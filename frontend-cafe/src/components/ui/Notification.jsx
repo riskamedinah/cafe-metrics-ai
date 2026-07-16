@@ -6,15 +6,15 @@ import {
   useRef,
   useEffect,
 } from "react";
-import { XCircle, AlertTriangle, Info, X } from "lucide-react"; // ✅ Hapus CheckCircle2
+import { XCircle, AlertTriangle, Info, X } from "lucide-react";
 
 const ToastContext = createContext(null);
 
 const TOAST_STYLES = {
-  success: { icon: null, color: "#3A72D2", bg: "#EAF0FC" }, // ✅ Icon null, warna biru
+  success: { icon: null, color: "#3A72D2", bg: "#EAF0FC" },
   error: { icon: XCircle, color: "#D8434E", bg: "#FCEAEB" },
   warning: { icon: AlertTriangle, color: "#C77D1E", bg: "#FDF3E4" },
-  info: { icon: Info, color: "#3A72D2", bg: "#EAF0FC" },    // ✅ Warna biru
+  info: { icon: Info, color: "#3A72D2", bg: "#EAF0FC" },
 };
 
 let idCounter = 0;
@@ -123,7 +123,6 @@ const ToastItem = ({ toast, onClose }) => {
           : "toastIn 220ms cubic-bezier(0.16,1,0.3,1)",
       }}
     >
-      {/* ✅ Icon hanya tampil jika ada (success tidak ada icon) */}
       {Icon && (
         <div
           style={{
@@ -176,7 +175,7 @@ const ToastItem = ({ toast, onClose }) => {
             bottom: 0,
             height: 3,
             width: "100%",
-            background: color, // ✅ Akan berwarna biru untuk success/info
+            background: color,
             opacity: 0.55,
             transformOrigin: "left",
             animationPlayState: paused ? "paused" : "running",

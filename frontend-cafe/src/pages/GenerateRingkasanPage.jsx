@@ -121,7 +121,7 @@ const handleSave = async () => {
           <input type="number" value={tahun} onChange={(e) => setTahun(Number(e.target.value))}
             style={{ padding: "8px 12px", borderRadius: 8, border: "1px solid #DDE1E7", background: "#fff", fontSize: 14, width: 80 }} />
           <button onClick={handleGenerate} disabled={loading}
-            style={{ display: "flex", alignItems: "center", gap: 8, background: "#3B5BDB", color: "#fff", border: "none", borderRadius: 8, padding: "10px 20px", fontSize: 15, fontWeight: 500, cursor: loading ? "not-allowed" : "pointer", opacity: loading ? 0.75 : 1 }}>
+            style={{ display: "flex", alignItems: "center", gap: 8, background: "#3A72D4", color: "#fff", border: "none", borderRadius: 8, padding: "10px 20px", fontSize: 15, fontWeight: 500, cursor: loading ? "not-allowed" : "pointer", opacity: loading ? 0.75 : 1 }}>
             {loading ? "Menghasilkan..." : <><Sparkles size={25} /> Generate</>}
           </button>
         </div>
@@ -132,11 +132,11 @@ const handleSave = async () => {
       {ringkasan && (
         <>
           <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-            <Card icon={<Package size={25} color="#3B5BDB" />} title="Ringkasan" subtitle="Data periode bulan ini">
+            <Card icon={<Package size={25} color="#3A72D4" />} title="Ringkasan" subtitle="Data periode bulan ini">
               <p style={{ fontSize: 15, color: "#4B5563", margin: 0 }}>{ringkasan.detail}</p>
             </Card>
 
-            <Card icon={<Info size={25} color="#3B5BDB" />} title="Rekomendasi" subtitle="Insight untuk meningkatkan performa">
+            <Card icon={<Info size={25} color="#3A72D4" />} title="Rekomendasi" subtitle="Insight untuk meningkatkan performa">
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                 {ringkasan.rekomendasi.map((item, idx) => (
                   <div key={idx} style={{ display: "flex", alignItems: "flex-start", gap: 10, background: "#F4F5F7", borderRadius: 8, padding: "12px 14px", fontSize: 15, color: "#4B5563" }}>
@@ -147,7 +147,7 @@ const handleSave = async () => {
               </div>
             </Card>
 
-            <Card icon={<TrendingUp size={25} color="#3B5BDB" />} title="Analisis Tren" subtitle="Insight Performa Produk">
+            <Card icon={<TrendingUp size={25} color="#3A72D4" />} title="Analisis Tren" subtitle="Insight Performa Produk">
               <p style={{ fontSize: 15, color: "#4B5563", lineHeight: 1.75, margin: 0 }}>{ringkasan.analisisTren}</p>
             </Card>
           </div>

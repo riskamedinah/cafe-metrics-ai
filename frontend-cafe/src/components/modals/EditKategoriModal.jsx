@@ -47,7 +47,7 @@ const EditKategoriModal = ({ isOpen, item, onClose, onSave }) => {
           placeholder="Masukkan nama kategori"
           value={nama}
           onChange={(e) => setNama(e.target.value)}
-          onFocus={(e) => (e.target.style.borderColor = "#3B5BDB")}
+          onFocus={(e) => (e.target.style.borderColor = "#3A72D4")}
           onBlur={(e) => (e.target.style.borderColor = "#DDE1E7")}
         />
       </div>
@@ -84,7 +84,7 @@ const EditKategoriModal = ({ isOpen, item, onClose, onSave }) => {
             padding: "9px 20px",
             border: "none",
             borderRadius: "8px",
-            background: "#3B5BDB",
+            background: "#3A72D4",
             fontSize: "13px",
             fontWeight: 600,
             color: "#fff",
@@ -92,7 +92,7 @@ const EditKategoriModal = ({ isOpen, item, onClose, onSave }) => {
             fontFamily: "inherit",
           }}
           onMouseEnter={(e) => (e.currentTarget.style.background = "#3451C7")}
-          onMouseLeave={(e) => (e.currentTarget.style.background = "#3B5BDB")}
+          onMouseLeave={(e) => (e.currentTarget.style.background = "#3A72D4")}
         >
           Edit Kategori
         </button>

@@ -127,7 +127,7 @@ if (loadingDashboard || !dashboard) {
         }
 
         .stat-icon {
-          color: #3B5BDB;
+          color: #3A72D4;
         }
 
         .stat-label {
@@ -246,7 +246,7 @@ if (loadingDashboard || !dashboard) {
           </p>
           <div className="chart-legend">
             <span className="legend-item">
-              <span className="legend-dot" style={{ background: "#3B5BDB" }} />
+              <span className="legend-dot" style={{ background: "#3A72D4" }} />
               Total Penjualan
             </span>
             <span className="legend-item">
@@ -270,7 +270,7 @@ if (loadingDashboard || !dashboard) {
                     return v.toString();
                   }} />
                   <Tooltip content={<CustomTooltip />} />
-                  <Line yAxisId="left" type="linear" dataKey="totalPenjualan" stroke="#3B5BDB" strokeWidth={2} dot={{ r: 4, fill: "white", stroke: "#3B5BDB", strokeWidth: 2 }} activeDot={{ r: 6, fill: "white", stroke: "#3451C7", strokeWidth: 2.5 }} isAnimationActive={false} />
+                  <Line yAxisId="left" type="linear" dataKey="totalPenjualan" stroke="#3A72D4" strokeWidth={2} dot={{ r: 4, fill: "white", stroke: "#3A72D4", strokeWidth: 2 }} activeDot={{ r: 6, fill: "white", stroke: "#3451C7", strokeWidth: 2.5 }} isAnimationActive={false} />
                   <Line yAxisId="right" type="linear" dataKey="totalHarga" stroke="#94A3B8" strokeWidth={2} strokeDasharray="6 4" dot={{ r: 4, fill: "white", stroke: "#94A3B8", strokeWidth: 2 }} activeDot={{ r: 6, fill: "white", stroke: "#64748B", strokeWidth: 2.5 }} isAnimationActive={false} />
                 </LineChart>
               </ResponsiveContainer>

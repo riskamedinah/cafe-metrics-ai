@@ -92,11 +92,11 @@ const LoginPage = () => {
                 type="checkbox"
                 checked={remember}
                 onChange={(e) => setRemember(e.target.checked)}
-                className="w-4 h-4 rounded border-gray-300 text-[#3B5BDB] focus:ring-[#3B5BDB]"
+                className="w-4 h-4 rounded border-gray-300 text-[#3A72D4] focus:ring-[#3A72D4]"
               />
               <span className="text-sm text-gray-500">Ingatkan saya</span>
             </label>
-            <button type="button" className="text-sm text-[#3B5BDB] font-medium hover:underline">
+            <button type="button" className="text-sm text-[#3A72D4] font-medium hover:underline">
               Lupa Password?
             </button>
           </div>
@@ -108,7 +108,7 @@ const LoginPage = () => {
 
         <p className="text-center text-sm text-gray-500 mt-5">
           Tidak punya akun?{' '}
-          <Link to="/register" className="text-[#3B5BDB] font-medium hover:underline">
+          <Link to="/register" className="text-[#3A72D4] font-medium hover:underline">
             Daftar sekarang.
           </Link>
         </p>

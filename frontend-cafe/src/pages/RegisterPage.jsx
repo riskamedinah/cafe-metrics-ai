@@ -117,7 +117,7 @@ const RegisterPage = () => {
 
         <p className="text-center text-sm text-gray-500 mt-5">
           Sudah punya akun?{' '}
-          <Link to="/login" className="text-[#3B5BDB] font-medium hover:underline">
+          <Link to="/login" className="text-[#3A72D4] font-medium hover:underline">
             Masuk sekarang.
           </Link>
         </p>

@@ -3,7 +3,7 @@ import dashboardPreview from '../../assets/banner-auth.svg'
 
 const AuthBanner = () => {
   return (
-    <div className="relative flex h-full flex-col overflow-hidden bg-[#3B5BDB] rounded-3xl">
+    <div className="relative flex h-full flex-col overflow-hidden bg-[#3A72D4] rounded-3xl">
       <div className="shrink-0 px-6 pt-10 lg:px-12 lg:pt-10">
         <div className="flex items-center gap-2.5">
           <div className="flex h-11 w-11 shrink-0 items-center justify-center">

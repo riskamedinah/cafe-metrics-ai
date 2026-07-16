@@ -20,7 +20,7 @@ const InputField = ({
                 onChange={onChange}
                 placeholder={placeholder}
                 required={required}
-                className={`w-full px-4 py-2.5 border rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-[#3B5BDB] focus:border-transparent transition ${
+                className={`w-full px-4 py-2.5 border rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-[#3A72D4] focus:border-transparent transition ${
                     error ? 'border-red-400' : 'border-gray-300'
                 }`}
             />

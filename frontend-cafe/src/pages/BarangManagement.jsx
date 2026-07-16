@@ -129,8 +129,8 @@ const handleHapus = async () => {
       id: item.id,
       nama: item.nama_barang,
       harga: item.harga_barang,
-      kategori_id: item.kategori_id,      // UBAH: ID
-      kategori_nama: item.kategori?.nama_kategori || "", // UBAH: untuk tampilan fallback (tidak dipakai sekarang)
+      kategori_id: item.kategori_id,    
+      kategori_nama: item.kategori?.nama_kategori || "", 
       stok: item.stok_barang,
       deskripsi: item.deskripsi_barang,
       gambar: item.foto_barang,
@@ -193,7 +193,7 @@ const handleHapus = async () => {
         />
         <button
           onClick={() => setModalTambah(true)}
-          className="flex items-center gap-2 rounded-lg bg-[#3B5BDB] px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#3451C7] whitespace-nowrap"
+          className="flex items-center gap-2 rounded-lg bg-[#3A72D4] px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#3451C7] whitespace-nowrap"
         >
           <Plus size={18} strokeWidth={2} />
           Tambah Barang
@@ -221,7 +221,7 @@ const handleHapus = async () => {
         isOpen={modalTambah}
         onClose={() => setModalTambah(false)}
         onSave={handleTambah}
-        kategoriList={kategoriList}     // <-- TAMBAHKAN
+        kategoriList={kategoriList}     
       />
 
       {selectedItem && (
@@ -230,7 +230,7 @@ const handleHapus = async () => {
           onClose={() => { setModalEdit(false); setSelectedItem(null); }}
           onSave={handleEdit}
           data={selectedItem}
-          kategoriList={kategoriList}   // <-- TAMBAHKAN
+          kategoriList={kategoriList}   
         />
       )}
 

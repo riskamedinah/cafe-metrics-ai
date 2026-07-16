@@ -9,7 +9,7 @@ export const DataProvider = ({ children }) => {
   const [kategori, setKategori] = useState(null);
   const [penjualan, setPenjualan] = useState(null);
   const [ringkasan, setRingkasan] = useState(null);
-  const [dashboard, setDashboard] = useState(null); // { stats, chart, table }
+  const [dashboard, setDashboard] = useState(null);
 
   // Loading flags
   const [loadingBarang, setLoadingBarang] = useState(false);
