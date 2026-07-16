@@ -21,11 +21,11 @@ const pageTitles = {
 
 // ─── Nav item styles ───────────────────────────────────────────────
 const navBase = 'flex items-center gap-3 px-4 py-3 rounded-lg text-base font-medium transition-colors duration-150 cursor-pointer w-full text-left'
-const navActive = 'bg-[#3B5BDB] text-white'
+const navActive = 'bg-[#3A72D4] text-white'
 const navInactive = 'text-black hover:bg-gray-100'
 
 const subNavBase = 'flex items-center gap-2.5 px-4 py-2.5 rounded-lg text-base font-medium transition-colors duration-150 cursor-pointer w-full text-left'
-const subNavActive = 'bg-[#3B5BDB] text-white font-medium'
+const subNavActive = 'bg-[#3A72D4] text-white font-medium'
 const subNavInactive = 'text-black hover:bg-gray-100'
 
 // ─── Sidebar content ──────────────────────────────────────────────
@@ -188,7 +188,7 @@ const Topbar = ({ onMenuClick }) => {
           onMouseLeave={handleMouseLeave}
         >
           {/* Avatar */}
-          <div className="w-9 h-9 rounded-full bg-[#3B5BDB] flex items-center justify-center text-white text-sm font-semibold flex-shrink-none">
+          <div className="w-9 h-9 rounded-full bg-[#3A72D4] flex items-center justify-center text-white text-sm font-semibold flex-shrink-none">
             {user?.name?.charAt(0).toUpperCase() ?? 'U'}
           </div>
 

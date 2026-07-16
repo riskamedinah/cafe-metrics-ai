@@ -13,6 +13,8 @@ import KategoriPage from './pages/KategoriPage';
 import GenerateRingkasanPage from './pages/GenerateRingkasanPage';
 import { ToastProvider } from "./components/ui/Notification";
 import { DataProvider } from './context/DataContext';
+import ForgotPasswordPage from './pages/ForgotPasswordPage'
+import ResetPasswordPage from './pages/ResetPasswordPage'
 
 import MainLayout from './layouts/MainLayout';
 
@@ -25,6 +27,8 @@ function App() {
                         <Routes>
                             <Route path="/login" element={<LoginPage />} />
                             <Route path="/register" element={<RegisterPage />} />
+                            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+<Route path="/reset-password" element={<ResetPasswordPage />} />
 
                             <Route path="/" element={
                                 <ProtectedRoute>

@@ -6,10 +6,13 @@ use App\Http\Controllers\BarangController;
 use App\Http\Controllers\PenjualanController;
 use App\Http\Controllers\RingkasanBulananController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\PasswordResetController;
 
 // Public Routes
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
+Route::post('/forgot-password', [PasswordResetController::class, 'sendResetLinkEmail']);
+Route::post('/reset-password', [PasswordResetController::class, 'reset']);
 
 // Protected Routes (Requires Authentication)
 Route::middleware('auth:sanctum')->group(function () {

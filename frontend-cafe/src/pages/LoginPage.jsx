@@ -96,9 +96,9 @@ const LoginPage = () => {
               />
               <span className="text-sm text-gray-500">Ingatkan saya</span>
             </label>
-            <button type="button" className="text-sm text-[#3A72D4] font-medium hover:underline">
-              Lupa Password?
-            </button>
+           <Link to="/forgot-password" className="text-sm text-[#3A72D4] font-medium hover:underline">
+  Lupa Password?
+</Link>
           </div>
 
           <Button type="submit" loading={loading}>
