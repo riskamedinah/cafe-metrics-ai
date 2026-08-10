@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import BaseModal from "../ui/BaseModal";
+import SelectField from "../ui/SelectField";
 import api from "../../lib/axios";
 
 const TambahPenjualanModal = ({ isOpen, onClose, onSave }) => {
@@ -49,19 +50,18 @@ const TambahPenjualanModal = ({ isOpen, onClose, onSave }) => {
   return (
     <BaseModal isOpen={isOpen} onClose={onClose} title="Tambah Penjualan" maxWidth="500px">
       <div style={{ padding: "20px 24px" }}>
-        <label style={{ display: "block", marginBottom: 6, fontSize: 13, fontWeight: 600 }}>Pilih Barang</label>
-        <select
+        <SelectField
+          label="Pilih Barang"
+          name="selectedBarang"
           value={selectedBarang}
           onChange={(e) => setSelectedBarang(e.target.value)}
-          style={{ width: "100%", padding: "10px", borderRadius: 8, border: "1px solid #DDE1E7", marginBottom: 16 }}
-        >
-          <option value="">-- Pilih Barang --</option>
-          {barangList.map((b) => (
-            <option key={b.id} value={b.id}>
-              {b.nama_barang} (Stok: {b.stok_barang})
-            </option>
-          ))}
-        </select>
+          options={barangList.map((b) => ({
+            value: b.id,
+            label: `${b.nama_barang} (Stok: ${b.stok_barang})`,
+          }))}
+          placeholder="Pilih Barang"
+          required
+        />
 
         <label style={{ display: "block", marginBottom: 6, fontSize: 13, fontWeight: 600 }}>Jumlah</label>
         <input

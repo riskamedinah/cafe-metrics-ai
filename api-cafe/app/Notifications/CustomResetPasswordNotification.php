@@ -3,7 +3,6 @@
 namespace App\Notifications;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
@@ -11,26 +10,24 @@ class CustomResetPasswordNotification extends Notification
 {
     use Queueable;
 
-    public $token;
+    // Ambil dan simpan token reset password
+    public function __construct(public string $token) {}
 
-    public function __construct($token)
-    {
-        $this->token = $token;
-    }
-
-    public function via($notifiable)
+    // Kirim notifikasi ini via email
+    public function via(object $notifiable): array
     {
         return ['mail'];
     }
 
-    public function toMail($notifiable)
+    // Mengatur isi dan tampilan pesan emailnya
+    public function toMail(object $notifiable): MailMessage
     {
-        // URL frontend React dengan parameter token & email
-        $resetUrl = url('/reset-password?token=' . $this->token . '&email=' . $notifiable->email);
+        $frontendUrl = config('app.frontend_url', 'http://localhost:3000');
+        $resetUrl = "{$frontendUrl}/reset-password?token={$this->token}&email=" . urlencode($notifiable->email);
 
         return (new MailMessage)
             ->subject('Reset Password - ' . config('app.name'))
-            ->greeting('Halo ' . $notifiable->name . '!')
+            ->greeting("Halo {$notifiable->name}!")
             ->line('Kami menerima permintaan reset password untuk akun Anda.')
             ->action('Reset Password Sekarang', $resetUrl)
             ->line('Link ini berlaku selama 60 menit.')

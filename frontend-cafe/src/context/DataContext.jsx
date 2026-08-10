@@ -8,7 +8,9 @@ export const DataProvider = ({ children }) => {
   const [barang, setBarang] = useState(null);
   const [kategori, setKategori] = useState(null);
   const [penjualan, setPenjualan] = useState(null);
+  const [penjualanMeta, setPenjualanMeta] = useState({ currentPage: 1, lastPage: 1 });
   const [ringkasan, setRingkasan] = useState(null);
+  const [ringkasanMeta, setRingkasanMeta] = useState({ currentPage: 1, lastPage: 1 });
   const [dashboard, setDashboard] = useState(null);
 
   // Loading flags
@@ -46,38 +48,42 @@ export const DataProvider = ({ children }) => {
     }
   }, [kategori]);
 
-  // ─── Fetch Penjualan ───
-  const fetchPenjualan = useCallback(async (force = false) => {
-    if (!force && penjualan !== null) return;
+  // ─── Fetch Penjualan (dengan pagination) ───
+  const fetchPenjualan = useCallback(async (page = 1) => {
     setLoadingPenjualan(true);
     try {
-      const res = await api.get("/penjualan");
+      const res = await api.get(`/penjualan?page=${page}`);
       if (res.data.status) {
-        const raw = res.data.data.data || res.data.data;
+        const paginated = res.data.data;
+        const raw = paginated.data || paginated;
         const mapped = raw.map((item) => ({
-           id: item.id,                     
-          barangId: item.barang_id,  
+          id: item.id,
+          barangId: item.barang_id,
           namaProduk: item.barang?.nama_barang || "Tidak diketahui",
           harga: item.barang?.harga_barang || 0,
           jumlah: item.jumlah,
         }));
         setPenjualan(mapped);
+        setPenjualanMeta({
+          currentPage: paginated.current_page || 1,
+          lastPage: paginated.last_page || 1,
+        });
       }
     } catch (err) {
       console.error("Gagal fetch penjualan:", err);
     } finally {
       setLoadingPenjualan(false);
     }
-  }, [penjualan]);
+  }, []);
 
-  // ─── Fetch Ringkasan ───
-  const fetchRingkasan = useCallback(async (force = false) => {
-    if (!force && ringkasan !== null) return;
+  // ─── Fetch Ringkasan (dengan pagination) ───
+  const fetchRingkasan = useCallback(async (page = 1) => {
     setLoadingRingkasan(true);
     try {
-      const res = await api.get("/ringkasan");
+      const res = await api.get(`/ringkasan?page=${page}`);
       if (res.data.status) {
-        const raw = res.data.data.data || res.data.data;
+        const paginated = res.data.data;
+        const raw = paginated.data || paginated;
         const mapped = raw.map((item) => ({
           id: item.id,
           bulan: [
@@ -90,25 +96,27 @@ export const DataProvider = ({ children }) => {
           ringkasanAI: item.analisis_ai || "",
         }));
         setRingkasan(mapped);
+        setRingkasanMeta({
+          currentPage: paginated.current_page || 1,
+          lastPage: paginated.last_page || 1,
+        });
       }
     } catch (err) {
       console.error("Gagal fetch ringkasan:", err);
     } finally {
       setLoadingRingkasan(false);
     }
-  }, [ringkasan]);
+  }, []);
 
   // ─── Fetch Dashboard ───
   const fetchDashboard = useCallback(async (force = false) => {
     if (!force && dashboard !== null) return;
     setLoadingDashboard(true);
     try {
-      // Ambil data dashboard (statistik + chart)
       const dashRes = await api.get("/dashboard");
       let stats = {}, chart = [];
       if (dashRes.data.status) {
         const { total_penjualan, total_pendapatan, chart_data } = dashRes.data.data;
-        // Ambil total produk & kategori dari endpoint terpisah
         const [barangRes, kategoriRes] = await Promise.all([
           api.get("/barang"),
           api.get("/kategori"),
@@ -125,7 +133,6 @@ export const DataProvider = ({ children }) => {
         chart = chart_data;
       }
 
-      // Ambil 5 penjualan terakhir untuk tabel
       const penRes = await api.get("/penjualan?per_page=5");
       let table = [];
       if (penRes.data.status) {
@@ -150,14 +157,15 @@ export const DataProvider = ({ children }) => {
   // ─── Refresh (force) functions ───
   const refreshBarang = () => fetchBarang(true);
   const refreshKategori = () => fetchKategori(true);
-  const refreshPenjualan = () => fetchPenjualan(true);
-  const refreshRingkasan = () => fetchRingkasan(true);
+  const refreshPenjualan = (page) => fetchPenjualan(page || penjualanMeta.currentPage);
+  const refreshRingkasan = (page) => fetchRingkasan(page || ringkasanMeta.currentPage);
   const refreshDashboard = () => fetchDashboard(true);
 
   return (
     <DataContext.Provider
       value={{
         barang, kategori, penjualan, ringkasan, dashboard,
+        penjualanMeta, ringkasanMeta,
         loadingBarang, loadingKategori, loadingPenjualan, loadingRingkasan, loadingDashboard,
         fetchBarang, fetchKategori, fetchPenjualan, fetchRingkasan, fetchDashboard,
         refreshBarang, refreshKategori, refreshPenjualan, refreshRingkasan, refreshDashboard,

@@ -3,6 +3,7 @@ import BarangCard from "../components/ui/BarangCard";
 import BeliBarangModal from "../components/modals/BeliBarangModal"; // tambah ini
 import { useToast } from "../components/ui/Notification";
 import { useData } from "../context/DataContext";
+import EmptyState from "../components/ui/EmptyState";
 import LoadingState from "../components/ui/LoadingState";
 
 export default function BarangPage() {
@@ -38,11 +39,18 @@ export default function BarangPage() {
 
   return (
     <div style={{ padding: "32px", background: "#F4F5F7", minHeight: "100vh", fontFamily: "'Geist Variable', 'Inter', sans-serif" }}>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: "20px" }}>
-        {dataBarang.map((item) => (
-          <BarangCard key={item.id} item={item} onBeli={handleBeli} />
-        ))}
-      </div>
+      {dataBarang.length === 0 ? (
+        <EmptyState
+          title="Belum ada produk"
+          description="Tidak ada barang yang tersedia untuk dibeli saat ini."
+        />
+      ) : (
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: "20px" }}>
+          {dataBarang.map((item) => (
+            <BarangCard key={item.id} item={item} onBeli={handleBeli} />
+          ))}
+        </div>
+      )}
 
       <BeliBarangModal
         isOpen={!!modalBeli}

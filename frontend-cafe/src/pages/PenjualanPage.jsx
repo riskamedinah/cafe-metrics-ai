@@ -2,11 +2,13 @@ import { useState, useEffect } from "react";
 import { SquarePen, Trash2 } from "lucide-react";
 import BaseSearch from "../components/ui/BaseSearch";
 import BaseTable from "../components/ui/BaseTable";
+import Pagination from "../components/ui/Pagination"; // 👈 Impor Pagination
 import EditPenjualanModal from "../components/modals/EditPenjualanModal";
 import HapusPenjualanModal from "../components/modals/HapusPenjualanModal";
 import api from "../lib/axios";
 import { useToast } from "../components/ui/Notification";
 import { useData } from "../context/DataContext";
+import EmptyState from "../components/ui/EmptyState";
 import LoadingState from "../components/ui/LoadingState";
 
 const bulanIni = () => {
@@ -16,13 +18,14 @@ const bulanIni = () => {
 
 export default function ManagementPenjualan() {
   const toast = useToast();
-  const { penjualan, fetchPenjualan, refreshPenjualan, loadingPenjualan } = useData();
+  // 👈 Ambil penjualanMeta
+  const { penjualan, penjualanMeta, fetchPenjualan, refreshPenjualan, loadingPenjualan } = useData(); 
   const [search, setSearch] = useState("");
   const [editItem, setEditItem] = useState(null);
   const [hapusItem, setHapusItem] = useState(null);
 
   useEffect(() => {
-    fetchPenjualan();
+    fetchPenjualan(1);
   }, []);
 
   const data = penjualan || [];
@@ -31,11 +34,15 @@ export default function ManagementPenjualan() {
     item.namaProduk.toLowerCase().includes(search.toLowerCase())
   );
 
+  const handlePageChange = (newPage) => {
+    fetchPenjualan(newPage);
+  };
+
   const handleEdit = async (updated) => {
     try {
       const res = await api.put(`/penjualan/${updated.id}`, { jumlah: updated.jumlah });
       if (res.data.status) {
-        refreshPenjualan();
+        refreshPenjualan(penjualanMeta.currentPage);
         setEditItem(null);
         toast.success("Penjualan diperbarui", "Jumlah berhasil diubah");
       } else {
@@ -50,7 +57,7 @@ export default function ManagementPenjualan() {
     try {
       const res = await api.delete(`/penjualan/${id}`);
       if (res.data.status) {
-        refreshPenjualan();
+        refreshPenjualan(penjualanMeta.currentPage);
         setHapusItem(null);
         toast.success("Penjualan dihapus", "Data berhasil dihapus");
       } else {
@@ -109,13 +116,30 @@ export default function ManagementPenjualan() {
 
         {loadingPenjualan && data.length === 0 ? (
           <LoadingState text="Memuat data penjualan..." />
-        ) : (
-          <BaseTable
-            columns={columns}
-            data={filteredData}
-            actionRow={actionRow}
-            emptyMessage="Belum ada transaksi penjualan."
+        ) : filteredData.length === 0 ? (
+          <EmptyState
+            title="Belum ada penjualan"
+            description={search ? "Tidak ada transaksi yang cocok dengan pencarian." : "Belum ada transaksi penjualan."}
           />
+        ) : (
+          <>
+            <BaseTable
+              columns={columns}
+              data={filteredData}
+              actionRow={actionRow}
+            />
+            
+            {/* 👈 Pasang Komponen Pagination di bawah Tabel */}
+            {!search && (
+              <div className="mt-4 flex justify-end">
+                <Pagination
+                  currentPage={penjualanMeta.currentPage}
+                  totalPages={penjualanMeta.lastPage}
+                  onPageChange={handlePageChange}
+                />
+              </div>
+            )}
+          </>
         )}
       </div>
 

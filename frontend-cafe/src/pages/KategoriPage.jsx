@@ -6,6 +6,7 @@ import TambahKategoriModal from "../components/modals/TambahKategoriModal";
 import EditKategoriModal from "../components/modals/EditKategoriModal";
 import HapusKategoriModal from "../components/modals/HapusKategoriModal";
 import CreateButton from "../components/ui/CreateButton";
+import EmptyState from "../components/ui/EmptyState";
 import { useData } from "../context/DataContext";
 import { useToast } from "../components/ui/Notification";
 import api from "../lib/axios";
@@ -102,6 +103,11 @@ const KategoriPage = () => {
 
        {loadingKategori && data.length === 0 ? (
          <LoadingState text="Memuat data kategori..." />
+       ) : filteredData.length === 0 ? (
+         <EmptyState
+           title="Tidak ada kategori"
+           description={searchQuery ? "Tidak ada kategori yang cocok dengan pencarian." : "Tidak ada kategori ditemukan."}
+         />
        ) : (
           <BaseTable
             columns={columns}

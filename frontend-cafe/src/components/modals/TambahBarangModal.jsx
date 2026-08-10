@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import { FilePlus, ChevronDown } from "lucide-react";
+import { FilePlus } from "lucide-react";
 import BaseModal from "../ui/BaseModal";
+import SelectField from "../ui/SelectField";
 
 // 🔹 Fungsi kompresi gambar
 const compressImage = (file) => {
@@ -149,16 +150,16 @@ const TambahBarangModal = ({ isOpen, onClose, onSave, kategoriList = [] }) => {
           <input type="text" name="harga" value={form.harga} onChange={handleChange} placeholder="Masukkan harga barang" style={{ width: "100%", padding: "10px 14px", border: "1px solid #DDE1E7", borderRadius: 8, fontSize: 13, color: "#374151", outline: "none", fontFamily: "inherit" }} />
         </div>
 
-        {/* Kategori */}
         <div style={{ marginBottom: 18 }}>
-          <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "#1E1F24", marginBottom: 6 }}>Kategori Barang</label>
-          <div style={{ position: "relative" }}>
-            <select name="kategori_id" value={form.kategori_id} onChange={handleChange} style={{ width: "100%", padding: "10px 40px 10px 14px", border: "1px solid #DDE1E7", borderRadius: 8, fontSize: 13, color: "#374151", outline: "none", fontFamily: "inherit", background: "#fff", appearance: "none" }}>
-              <option value="">Pilih Kategori Barang</option>
-              {kategoriList.map((kat) => (<option key={kat.id} value={kat.id}>{kat.nama_kategori}</option>))}
-            </select>
-            <ChevronDown size={18} style={{ position: "absolute", right: 14, top: "50%", transform: "translateY(-50%)", color: "#374151", pointerEvents: "none" }} />
-          </div>
+          <SelectField
+            label="Kategori Barang"
+            name="kategori_id"
+            value={form.kategori_id}
+            onChange={handleChange}
+            options={kategoriList.map((kat) => ({ value: kat.id, label: kat.nama_kategori }))}
+            placeholder="Pilih Kategori Barang"
+            required
+          />
         </div>
 
         {/* Stok */}

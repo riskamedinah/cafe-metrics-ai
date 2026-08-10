@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Minus, Plus } from "lucide-react";
 import BaseModal from "../ui/BaseModal";
+import Badge from "../ui/Badge";
 import { useToast } from "../ui/Notification";
 import api from "../../lib/axios";
 
@@ -71,20 +72,7 @@ const BeliBarangModal = ({ isOpen, onClose, item, onSuccess }) => {
               {item.nama}
             </div>
             {item.kategori ? (
-              <span
-                style={{
-                  display: "inline-block",
-                  marginTop: 4,
-                  padding: "2px 8px",
-                  borderRadius: 999,
-                  background: "#F4F5F7",
-                  color: "#5F637B",
-                  fontSize: 11,
-                  fontWeight: 500,
-                }}
-              >
-                {item.kategori}
-              </span>
+              <Badge variant="secondary">{item.kategori}</Badge>
             ) : null}
             <div style={{ marginTop: 6, fontSize: 14, fontWeight: 600, color: "var(--color-primary)" }}>
               {formatRupiah(item.harga)}

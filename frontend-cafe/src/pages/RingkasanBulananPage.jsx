@@ -2,14 +2,11 @@ import { useState, useEffect } from "react";
 import { Eye } from "lucide-react";
 import BaseSearch from "../components/ui/BaseSearch";
 import BaseTable from "../components/ui/BaseTable";
+import EmptyState from "../components/ui/EmptyState";
+import Pagination from "../components/ui/Pagination"; // 👈 Impor Pagination
 import RingkasanBulananModal from "../components/modals/RingkasanBulananModal";
 import { useData } from "../context/DataContext";
 import LoadingState from "../components/ui/LoadingState";
-
-const BULAN = [
-  "Januari", "Februari", "Maret", "April", "Mei", "Juni",
-  "Juli", "Agustus", "September", "Oktober", "November", "Desember",
-];
 
 const bulanIni = () => {
   const d = new Date();
@@ -17,13 +14,14 @@ const bulanIni = () => {
 };
 
 export default function RingkasanBulananPage() {
-  const { ringkasan, fetchRingkasan, loadingRingkasan } = useData();
+  // 👈 Ambil ringkasanMeta
+  const { ringkasan, ringkasanMeta, fetchRingkasan, loadingRingkasan } = useData(); 
   const [search, setSearch] = useState("");
   const [selectedItem, setSelectedItem] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
 
   useEffect(() => {
-    fetchRingkasan();
+    fetchRingkasan(1);
   }, []);
 
   const data = ringkasan || [];
@@ -33,6 +31,10 @@ export default function RingkasanBulananPage() {
       item.bulan.toLowerCase().includes(search.toLowerCase()) ||
       item.tahun.toString().includes(search)
   );
+
+  const handlePageChange = (newPage) => {
+    fetchRingkasan(newPage);
+  };
 
   const handleOpenDetail = (item) => {
     setSelectedItem(item);
@@ -75,8 +77,26 @@ export default function RingkasanBulananPage() {
 
         {loadingRingkasan && data.length === 0 ? (
           <LoadingState text="Memuat data ringkasan bulanan..." />
+        ) : filteredData.length === 0 ? (
+          <EmptyState
+            title="Data ringkasan kosong"
+            description={search ? "Tidak ada ringkasan yang cocok dengan pencarian." : "Belum ada data ringkasan bulanan."}
+          />
         ) : (
-          <BaseTable columns={columns} data={filteredData} actionRow={actionRow} emptyMessage="Tidak ada data ringkasan." />
+          <>
+            <BaseTable columns={columns} data={filteredData} actionRow={actionRow} emptyMessage="Tidak ada data ringkasan." />
+            
+            {/* 👈 Pasang Komponen Pagination */}
+            {!search && (
+              <div className="mt-4 flex justify-end">
+                <Pagination
+                  currentPage={ringkasanMeta.currentPage}
+                  totalPages={ringkasanMeta.lastPage}
+                  onPageChange={handlePageChange}
+                />
+              </div>
+            )}
+          </>
         )}
       </div>
       <RingkasanBulananModal isOpen={modalOpen} onClose={() => { setModalOpen(false); setSelectedItem(null); }} data={selectedItem} />

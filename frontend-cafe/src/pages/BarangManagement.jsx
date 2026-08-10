@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Plus, SquarePen, Trash2 } from "lucide-react";
 import BaseSearch from "../components/ui/BaseSearch";
+import Badge from "../components/ui/Badge";
 import BaseTable from "../components/ui/BaseTable";
 import TambahBarangModal from "../components/modals/TambahBarangModal";
 import EditBarangModal from "../components/modals/EditBarangModal";
@@ -167,7 +168,12 @@ const handleHapus = async () => {
     {
       header: "Kategori",
       key: "kategori",
-      render: (item) => item.kategori?.nama_kategori || "-",
+      render: (item) =>
+        item.kategori?.nama_kategori ? (
+          <Badge variant="secondary">{item.kategori.nama_kategori}</Badge>
+        ) : (
+          "-"
+        ),
     },
     { header: "Deskripsi", key: "deskripsi_barang" },
   ];

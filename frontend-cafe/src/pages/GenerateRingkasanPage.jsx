@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Sparkles, Package, Info, TrendingUp, Save } from "lucide-react";
 import api from "../lib/axios";
+import SelectField from "../components/ui/SelectField";
 import { useToast } from "../components/ui/Notification";
 import { useData } from "../context/DataContext";
 
@@ -107,17 +108,27 @@ const handleSave = async () => {
     setError("");
   };
 
+  const monthOptions = Array.from({ length: 12 }, (_, i) => ({
+    value: i + 1,
+    label: new Date(0, i).toLocaleString('id-ID', { month: 'long' }),
+  }));
+
   return (
     <div style={{ padding: "32px", background: "#F4F5F7", minHeight: "100vh", fontFamily: "'Geist Variable', 'Inter', sans-serif" }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "24px" }}>
         <h2 style={{ fontSize: "22px", fontWeight: 500, color: "#1E1F24", margin: 0 }}>AI Generate Ringkasan</h2>
         <div style={{ display: "flex", gap: "12px" }}>
-          <select value={bulan} onChange={(e) => setBulan(Number(e.target.value))}
-            style={{ padding: "8px 12px", borderRadius: 8, border: "1px solid #DDE1E7", background: "#fff", fontSize: 14 }}>
-            {Array.from({ length: 12 }, (_, i) => (
-              <option key={i + 1} value={i + 1}>{new Date(0, i).toLocaleString('id-ID', { month: 'long' })}</option>
-            ))}
-          </select>
+          <div style={{ minWidth: 180 }}>
+            <SelectField
+              label=""
+              name="bulan"
+              value={bulan}
+              onChange={(e) => setBulan(Number(e.target.value))}
+              options={monthOptions}
+              placeholder="Pilih Bulan"
+              required
+            />
+          </div>
           <input type="number" value={tahun} onChange={(e) => setTahun(Number(e.target.value))}
             style={{ padding: "8px 12px", borderRadius: 8, border: "1px solid #DDE1E7", background: "#fff", fontSize: 14, width: 80 }} />
           <button onClick={handleGenerate} disabled={loading}
