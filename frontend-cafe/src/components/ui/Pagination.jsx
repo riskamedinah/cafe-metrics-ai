@@ -10,6 +10,8 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
+        flexWrap: "wrap", // <-- Agar otomatis berpindah baris dengan rapi jika di layar HP sempit
+        gap: "12px",     // <-- Memberikan jarak minimal 12px antara teks dan tombol
         padding: "16px 20px",
         background: "#ffffff",
         borderRadius: "0 0 12px 12px",
@@ -21,7 +23,7 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
         <strong style={{ color: "#1E1F24" }}>{totalPages}</strong>
       </span>
 
-      <div style={{ display: "flex", gap: "6px" }}>
+      <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
         <button
           onClick={() => onPageChange(currentPage - 1)}
           disabled={currentPage === 1}

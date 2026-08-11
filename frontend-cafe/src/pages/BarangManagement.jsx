@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { Plus, SquarePen, Trash2 } from "lucide-react";
 import BaseSearch from "../components/ui/BaseSearch";
-import Badge from "../components/ui/Badge";
 import BaseTable from "../components/ui/BaseTable";
+import CreateButton from "../components/ui/CreateButton";
+import EmptyState from "../components/ui/EmptyState";
 import TambahBarangModal from "../components/modals/TambahBarangModal";
 import EditBarangModal from "../components/modals/EditBarangModal";
 import HapusBarangModal from "../components/modals/HapusBarangModal";
@@ -168,12 +169,7 @@ const handleHapus = async () => {
     {
       header: "Kategori",
       key: "kategori",
-      render: (item) =>
-        item.kategori?.nama_kategori ? (
-          <Badge variant="secondary">{item.kategori.nama_kategori}</Badge>
-        ) : (
-          "-"
-        ),
+      render: (item) => item.kategori?.nama_kategori || "-",
     },
     { header: "Deskripsi", key: "deskripsi_barang" },
   ];
@@ -197,22 +193,21 @@ const handleHapus = async () => {
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Cari Barang"
         />
-        <button
-          onClick={() => setModalTambah(true)}
-          className="flex items-center gap-2 rounded-lg bg-[#3A72D4] px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#3451C7] whitespace-nowrap"
-        >
-          <Plus size={18} strokeWidth={2} />
-          Tambah Barang
-        </button>
+        <CreateButton onClick={() => setModalTambah(true)} label="Tambah Barang" />
       </div>
 
       <div className="rounded-xl bg-white p-6 shadow-sm">
         <h2 className="text-base font-semibold text-neutral-900">Tabel Data Barang</h2>
         <p className="mb-5 text-sm text-neutral-400">{periode}</p>
 
-       {loadingBarang && data.length === 0 ? (
-  <LoadingState text="Memuat data barang..." />
-) : (
+        {loadingBarang && data.length === 0 ? (
+          <LoadingState text="Memuat data barang..." />
+        ) : filteredData.length === 0 ? (
+          <EmptyState
+            title="Tidak ada barang"
+            description="Belum ada data barang atau belum ada barang yang sesuai dengan pencarian."
+          />
+        ) : (
           <BaseTable
             columns={columns}
             data={filteredData}

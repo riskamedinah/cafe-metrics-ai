@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
-import { SquarePen, Trash2 } from "lucide-react";
+import { Plus, SquarePen, Trash2 } from "lucide-react";
 import BaseSearch from "../components/ui/BaseSearch";
 import BaseTable from "../components/ui/BaseTable";
+import CreateButton from "../components/ui/CreateButton";
 import TambahKategoriModal from "../components/modals/TambahKategoriModal";
 import EditKategoriModal from "../components/modals/EditKategoriModal";
 import HapusKategoriModal from "../components/modals/HapusKategoriModal";
-import CreateButton from "../components/ui/CreateButton";
 import EmptyState from "../components/ui/EmptyState";
 import { useData } from "../context/DataContext";
 import { useToast } from "../components/ui/Notification";

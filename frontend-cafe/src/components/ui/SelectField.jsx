@@ -13,7 +13,7 @@ const SelectField = ({
   return (
     <div>
       {label && (
-        <label className="block text-base font-medium text-gray-700 mb-1.5">
+        <label className="block text-[13px] font-semibold text-[#1E1F24] mb-1.5">
           {label} {required && <span className="text-red-500">*</span>}
         </label>
       )}
@@ -22,22 +22,23 @@ const SelectField = ({
         value={value}
         onChange={onChange}
         required={required}
-        className={`w-full px-4 py-2.5 border rounded-lg text-base bg-white focus:outline-none focus:ring-2 focus:ring-[#3A72D4] focus:border-transparent transition ${
-          error ? "border-red-400" : "border-gray-300"
-        }`}
+        className={`w-full px-3.5 py-2.5 border rounded-lg text-[13px] bg-white focus:outline-none focus:border-[#3A72D4] transition ${
+          // 🔹 Logika warna placeholder vs opsi terpilih
+          !value ? "text-[#9CA3AF]" : "text-[#374151]"
+        } ${error ? "border-red-400" : "border-[#DDE1E7]"}`}
       >
         {placeholder && (
-          <option value="" disabled>
+          <option value="" disabled className="text-[#9CA3AF]">
             {placeholder}
           </option>
         )}
         {options.map((opt, idx) => (
-          <option key={idx} value={opt.value}>
+          <option key={idx} value={opt.value} className="text-[#374151]">
             {opt.label}
           </option>
         ))}
       </select>
-      {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
+      {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
     </div>
   );
 };

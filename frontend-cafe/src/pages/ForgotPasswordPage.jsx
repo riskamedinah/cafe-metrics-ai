@@ -2,7 +2,6 @@ import { useState, useRef, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import AuthLayout from '../components/layouts/AuthLayout'
 import InputField from '../components/ui/InputField'
-import Button from '../components/ui/Button'
 import api from '../lib/axios'
 
 const ForgotPasswordPage = () => {
@@ -73,9 +72,13 @@ const ForgotPasswordPage = () => {
             disabled={success}
           />
 
-          <Button type="submit" loading={loading} disabled={success}>
-            Kirim Link Reset
-          </Button>
+          <button
+            type="submit"
+            disabled={loading || success}
+            className="w-full bg-[#3A72D4] hover:bg-[#3451c7] text-white py-2.5 rounded-lg font-medium text-sm transition disabled:opacity-60 disabled:cursor-not-allowed"
+          >
+            {loading ? 'Memproses...' : 'Kirim Link Reset'}
+          </button>
         </form>
 
         <p className="text-center text-sm text-gray-500 mt-5">

@@ -5,7 +5,6 @@ import api from '../lib/axios'
 import AuthLayout from '../components/layouts/AuthLayout'
 import InputField from '../components/ui/InputField'
 import PasswordField from '../components/ui/PasswordField'
-import Button from '../components/ui/Button'
 
 const LoginPage = () => {
   const { login } = useAuth()
@@ -101,9 +100,13 @@ const LoginPage = () => {
 </Link>
           </div>
 
-          <Button type="submit" loading={loading}>
-            Login
-          </Button>
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-[#3A72D4] hover:bg-[#3451c7] text-white py-2.5 rounded-lg font-medium text-sm transition disabled:opacity-60 disabled:cursor-not-allowed"
+          >
+            {loading ? 'Memproses...' : 'Login'}
+          </button>
         </form>
 
         <p className="text-center text-sm text-gray-500 mt-5">

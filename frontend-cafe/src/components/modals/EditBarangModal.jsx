@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { FilePlus, ChevronDown } from "lucide-react";
 import BaseModal from "../ui/BaseModal";
+import SelectField from "../ui/SelectField";
 
 // 🔹 Fungsi kompresi gambar (sama persis dengan TambahBarangModal)
 const compressImage = (file) => {
