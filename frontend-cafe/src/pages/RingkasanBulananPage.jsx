@@ -66,7 +66,7 @@ export default function RingkasanBulananPage() {
   );
 
   return (
-    <div className="p-8 bg-[#F4F5F7] min-h-screen font-sans">
+    <div className="p-8 bg-neutral-50 min-h-screen font-sans">
       <div className="flex flex-col sm:flex-row items-start justify-between gap-4 mb-4">
         <BaseSearch value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Cari Ringkasan Bulanan" />
       </div>
