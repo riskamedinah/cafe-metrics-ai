@@ -1,9 +1,8 @@
-import React, { useState } from "react";
-import { FilePlus } from "lucide-react";
-import BaseModal from "../ui/BaseModal";
+import React, { useState, useRef, useEffect } from "react";
+import { FilePlus, X } from "lucide-react";
+import BaseModal from "./BaseModal";
 import SelectField from "../ui/SelectField";
 
-// 🔹 Fungsi kompresi gambar
 const compressImage = (file) => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -13,7 +12,7 @@ const compressImage = (file) => {
         const canvas = document.createElement("canvas");
         let width = img.width;
         let height = img.height;
-        const MAX_WIDTH = 800; // lebar maksimal
+        const MAX_WIDTH = 800;
 
         if (width > MAX_WIDTH) {
           height = (height * MAX_WIDTH) / width;
@@ -28,7 +27,7 @@ const compressImage = (file) => {
         canvas.toBlob(
           (blob) => {
             if (blob) {
-              const compressedFile = new File([blob], file.name, {
+              const compressedFile = new File([blob], file.name.replace(/\.[^/.]+$/, "") + ".jpg", {
                 type: "image/jpeg",
                 lastModified: Date.now(),
               });
@@ -38,7 +37,7 @@ const compressImage = (file) => {
             }
           },
           "image/jpeg",
-          0.7 // kualitas kompresi 70%
+          0.7
         );
       };
       img.onerror = reject;
@@ -47,6 +46,21 @@ const compressImage = (file) => {
     reader.onerror = reject;
     reader.readAsDataURL(file);
   });
+};
+
+const formatRupiahInput = (val) => {
+  const numberString = val.replace(/[^,\d]/g, "").toString();
+  const split = numberString.split(",");
+  const sisa = split[0].length % 3;
+  let rupiah = split[0].substr(0, sisa);
+  const ribuan = split[0].substr(sisa).match(/\d{3}/gi);
+
+  if (ribuan) {
+    const separator = sisa ? "." : "";
+    rupiah += separator + ribuan.join(".");
+  }
+
+  return split[1] !== undefined ? rupiah + "," + split[1] : rupiah;
 };
 
 const TambahBarangModal = ({ isOpen, onClose, onSave, kategoriList = [] }) => {
@@ -62,15 +76,45 @@ const TambahBarangModal = ({ isOpen, onClose, onSave, kategoriList = [] }) => {
   const [fileName, setFileName] = useState("");
   const [selectedFile, setSelectedFile] = useState(null);
   const [isCompressing, setIsCompressing] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+
+  const fileInputRef = useRef(null);
+
+  useEffect(() => {
+    return () => {
+      if (filePreview && filePreview.startsWith("blob:")) {
+        URL.revokeObjectURL(filePreview);
+      }
+    };
+  }, [filePreview]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+    if (name === "harga") {
+      setForm((prev) => ({ ...prev, harga: formatRupiahInput(value) }));
+    } else {
+      setForm((prev) => ({ ...prev, [name]: value }));
+    }
   };
 
-  const handleFileChange = async (e) => {
-    const file = e.target.files[0];
+  const resetForm = () => {
+    setForm({ nama: "", harga: "", kategori_id: "", stok: "", deskripsi: "" });
+    if (filePreview && filePreview.startsWith("blob:")) {
+      URL.revokeObjectURL(filePreview);
+    }
+    setFilePreview(null);
+    setFileName("");
+    setSelectedFile(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const processFile = async (file) => {
     if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      alert("Harap pilih file gambar.");
+      return;
+    }
 
     if (file.size > 10 * 1024 * 1024) {
       alert("Ukuran gambar maksimal 10MB sebelum dikompresi.");
@@ -80,20 +124,16 @@ const TambahBarangModal = ({ isOpen, onClose, onSave, kategoriList = [] }) => {
     setIsCompressing(true);
     try {
       const compressed = await compressImage(file);
-      // Batasi tetap 2MB setelah kompresi
       if (compressed.size > 2 * 1024 * 1024) {
         alert("Gambar masih terlalu besar setelah kompresi, pilih gambar lain.");
-        setIsCompressing(false);
         return;
       }
 
       setSelectedFile(compressed);
       setFileName(compressed.name);
 
-      // Preview dari hasil kompresi
-      const previewReader = new FileReader();
-      previewReader.onloadend = () => setFilePreview(previewReader.result);
-      previewReader.readAsDataURL(compressed);
+      const objectUrl = URL.createObjectURL(compressed);
+      setFilePreview(objectUrl);
     } catch (err) {
       alert("Gagal mengompresi gambar.");
       console.error(err);
@@ -102,15 +142,54 @@ const TambahBarangModal = ({ isOpen, onClose, onSave, kategoriList = [] }) => {
     }
   };
 
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    processFile(file);
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      processFile(e.dataTransfer.files[0]);
+    }
+  };
+
+  const handleRemoveFile = () => {
+    if (filePreview && filePreview.startsWith("blob:")) {
+      URL.revokeObjectURL(filePreview);
+    }
+    setSelectedFile(null);
+    setFilePreview(null);
+    setFileName("");
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
   const handleSubmit = () => {
     if (!form.nama || !form.harga || !form.kategori_id || form.stok === "") {
       alert("Nama, Harga, Kategori, dan Stok wajib diisi.");
       return;
     }
 
+    const cleanHarga = parseFloat(form.harga.replace(/\./g, "").replace(",", ".")) || 0;
+
     const formData = new FormData();
     formData.append("nama_barang", form.nama);
-    formData.append("harga_barang", parseFloat(form.harga.replace(/\./g, "")) || 0);
+    formData.append("harga_barang", cleanHarga);
     formData.append("kategori_id", form.kategori_id);
     formData.append("stok_barang", parseInt(form.stok, 10) || 0);
     formData.append("deskripsi_barang", form.deskripsi || "");
@@ -119,38 +198,42 @@ const TambahBarangModal = ({ isOpen, onClose, onSave, kategoriList = [] }) => {
     }
 
     onSave(formData);
-
-    // Reset
-    setForm({ nama: "", harga: "", kategori_id: "", stok: "", deskripsi: "" });
-    setFilePreview(null);
-    setFileName("");
-    setSelectedFile(null);
+    resetForm();
   };
 
   const handleClose = () => {
-    setForm({ nama: "", harga: "", kategori_id: "", stok: "", deskripsi: "" });
-    setFilePreview(null);
-    setFileName("");
-    setSelectedFile(null);
+    resetForm();
     onClose();
   };
 
   return (
     <BaseModal isOpen={isOpen} onClose={handleClose} title="Tambah Barang">
-      <div style={{ padding: "24px" }}>
-        {/* Nama */}
-        <div style={{ marginBottom: 18 }}>
-          <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "#1E1F24", marginBottom: 6 }}>Nama Barang</label>
-          <input type="text" name="nama" value={form.nama} onChange={handleChange} placeholder="Masukkan nama barang" style={{ width: "100%", padding: "10px 14px", border: "1px solid #DDE1E7", borderRadius: 8, fontSize: 13, color: "#374151", outline: "none", fontFamily: "inherit" }} />
+      <div className="p-6">
+        <div className="mb-4">
+          <label className="block text-xs font-semibold text-gray-900 mb-1.5">Nama Barang</label>
+          <input
+            type="text"
+            name="nama"
+            value={form.nama}
+            onChange={handleChange}
+            placeholder="Masukkan nama barang"
+            className="w-full px-3.5 py-2.5 border border-gray-300 rounded-lg text-sm text-gray-700 outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600"
+          />
         </div>
 
-        {/* Harga */}
-        <div style={{ marginBottom: 18 }}>
-          <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "#1E1F24", marginBottom: 6 }}>Harga Barang</label>
-          <input type="text" name="harga" value={form.harga} onChange={handleChange} placeholder="Masukkan harga barang" style={{ width: "100%", padding: "10px 14px", border: "1px solid #DDE1E7", borderRadius: 8, fontSize: 13, color: "#374151", outline: "none", fontFamily: "inherit" }} />
+        <div className="mb-4">
+          <label className="block text-xs font-semibold text-gray-900 mb-1.5">Harga Barang</label>
+          <input
+            type="text"
+            name="harga"
+            value={form.harga}
+            onChange={handleChange}
+            placeholder="Contoh: 150.000"
+            className="w-full px-3.5 py-2.5 border border-gray-300 rounded-lg text-sm text-gray-700 outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600"
+          />
         </div>
 
-        <div style={{ marginBottom: 18 }}>
+        <div className="mb-4">
           <SelectField
             label="Kategori Barang"
             name="kategori_id"
@@ -162,50 +245,88 @@ const TambahBarangModal = ({ isOpen, onClose, onSave, kategoriList = [] }) => {
           />
         </div>
 
-        {/* Stok */}
-        <div style={{ marginBottom: 18 }}>
-          <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "#1E1F24", marginBottom: 6 }}>Stok Barang</label>
-          <input type="number" name="stok" value={form.stok} onChange={handleChange} placeholder="Masukkan jumlah stok" min="0" style={{ width: "100%", padding: "10px 14px", border: "1px solid #DDE1E7", borderRadius: 8, fontSize: 13, color: "#374151", outline: "none", fontFamily: "inherit" }} />
+        <div className="mb-4">
+          <label className="block text-xs font-semibold text-gray-900 mb-1.5">Stok Barang</label>
+          <input
+            type="number"
+            name="stok"
+            value={form.stok}
+            onChange={handleChange}
+            placeholder="Masukkan jumlah stok"
+            min="0"
+            className="w-full px-3.5 py-2.5 border border-gray-300 rounded-lg text-sm text-gray-700 outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600"
+          />
         </div>
 
-        {/* Deskripsi */}
-        <div style={{ marginBottom: 18 }}>
-          <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "#1E1F24", marginBottom: 6 }}>Deskripsi</label>
-          <div style={{ position: "relative" }}>
-            <textarea name="deskripsi" value={form.deskripsi} onChange={handleChange} placeholder="Masukkan deskripsi barang" rows={3} maxLength={200} style={{ width: "100%", padding: "10px 14px 26px 14px", border: "1px solid #DDE1E7", borderRadius: 8, fontSize: 13, color: "#374151", outline: "none", fontFamily: "inherit", resize: "vertical" }} />
-            <span style={{ position: "absolute", left: 14, bottom: 8, fontSize: 11, color: "#9DA3AE" }}>{form.deskripsi.length}/200</span>
+        <div className="mb-4">
+          <label className="block text-xs font-semibold text-gray-900 mb-1.5">Deskripsi</label>
+          <div className="relative">
+            <textarea
+              name="deskripsi"
+              value={form.deskripsi}
+              onChange={handleChange}
+              placeholder="Masukkan deskripsi barang"
+              rows={3}
+              maxLength={200}
+              className="w-full px-3.5 pt-2.5 pb-6 border border-gray-300 rounded-lg text-sm text-gray-700 outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 resize-y"
+            />
+            <span className="absolute left-3.5 bottom-2 text-[11px] text-gray-400">{form.deskripsi.length}/200</span>
           </div>
         </div>
 
-        {/* Upload Foto + Kompresi */}
-        <div style={{ marginBottom: 24 }}>
-          <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "#1E1F24", marginBottom: 6 }}>Foto Barang</label>
+        {/* Drag & Drop File Upload */}
+        <div className="mb-6">
+          <label className="block text-xs font-semibold text-gray-900 mb-1.5">Foto Barang</label>
           <div
-            style={{ border: "1px dashed #DDE1E7", borderRadius: 8, padding: "28px 20px", textAlign: "center", cursor: "pointer", transition: "border-color 0.15s" }}
-            onClick={() => document.getElementById("fileInputTambah").click()}
+            className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors ${
+              isDragging ? "border-blue-500 bg-blue-50" : "border-gray-300 hover:bg-gray-50"
+            }`}
+            onClick={() => fileInputRef.current?.click()}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
           >
-            <div style={{ width: 48, height: 48, borderRadius: "50%", background: "#3A72D2", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
-              <FilePlus size={22} color="#fff" />
+            <div className="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center mx-auto mb-3">
+              <FilePlus size={22} className="text-white" />
             </div>
-            <div style={{ fontSize: 14, fontWeight: 600, color: "#1E1F24", marginBottom: 4 }}>Klik Atau Seret Untuk Mengunggah</div>
-            <div style={{ fontSize: 12, color: "#9DA3AE" }}>• Maksimal 2MB setelah kompresi</div>
-            <input id="fileInputTambah" type="file" accept="image/*" onChange={handleFileChange} style={{ display: "none" }} />
+            <div className="text-sm font-semibold text-gray-900 mb-1">Klik Atau Seret Untuk Mengunggah</div>
+            <div className="text-xs text-gray-400">• Maksimal 2MB setelah kompresi</div>
+            <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
           </div>
 
-          {isCompressing && <p style={{ marginTop: 8, fontSize: 12, color: "#6B7280" }}>Mengompresi gambar...</p>}
+          {isCompressing && <p className="mt-2 text-xs text-gray-500">Mengompresi gambar...</p>}
 
           {filePreview && (
-            <div style={{ marginTop: 16 }}>
-              <img src={filePreview} alt="Preview" style={{ maxHeight: 70, maxWidth: "100%", objectFit: "contain", display: "block" }} />
-              <span style={{ display: "block", fontSize: 12, color: "#6B7280", marginTop: 8 }}>{fileName}</span>
+            <div className="mt-4 flex items-center gap-3 bg-gray-50 p-2.5 rounded-lg border border-gray-200">
+              <img src={filePreview} alt="Preview" className="h-12 w-12 object-cover rounded-md" />
+              <div className="flex-1 overflow-hidden">
+                <span className="block text-xs font-medium text-gray-700 truncate">{fileName}</span>
+              </div>
+              <button type="button" onClick={handleRemoveFile} className="p-1 text-gray-400 hover:text-red-500">
+                <X size={18} />
+              </button>
             </div>
           )}
         </div>
 
-        {/* Buttons */}
-        <div style={{ display: "flex", justifyContent: "flex-end", gap: 12, paddingTop: 8, borderTop: "1px solid #F0F1F3", marginTop: 24 }}>
-          <button onClick={handleClose} style={{ padding: "10px 24px", background: "transparent", border: "1px solid #DDE1E7", borderRadius: 8, fontSize: 13, fontWeight: 500, color: "#6B7280", cursor: "pointer" }}>Batal</button>
-          <button onClick={handleSubmit} style={{ padding: "10px 24px", background: "#3A72D2", border: "none", borderRadius: 8, fontSize: 13, fontWeight: 600, color: "#fff", cursor: "pointer" }}>Tambah Barang</button>
+        <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
+          <button
+            type="button"
+            onClick={handleClose}
+            className="px-5 py-2.5 bg-white border border-gray-300 rounded-lg text-xs font-medium text-gray-600 hover:bg-gray-50 transition-colors"
+          >
+            Batal
+          </button>
+          <button
+            type="button"
+            onClick={handleSubmit}
+            disabled={isCompressing}
+            className={`px-5 py-2.5 rounded-lg text-xs font-semibold text-white transition-colors ${
+              isCompressing ? "bg-blue-300 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
+            }`}
+          >
+            Tambah Barang
+          </button>
         </div>
       </div>
     </BaseModal>

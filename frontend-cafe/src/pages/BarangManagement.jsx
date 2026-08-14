@@ -4,9 +4,9 @@ import BaseSearch from "../components/ui/BaseSearch";
 import BaseTable from "../components/ui/BaseTable";
 import CreateButton from "../components/ui/CreateButton";
 import EmptyState from "../components/ui/EmptyState";
+import ConfirmModal from "../components/modals/ConfirmModal";
 import TambahBarangModal from "../components/modals/TambahBarangModal";
 import EditBarangModal from "../components/modals/EditBarangModal";
-import HapusBarangModal from "../components/modals/HapusBarangModal";
 import api from "../lib/axios";
 import { useToast } from "../components/ui/Notification";
 import { useData } from "../context/DataContext";
@@ -63,15 +63,12 @@ const ManagementBarang = () => {
         if (openEditModal) setModalEdit(true);
         if (openHapusModal) setModalHapus(true);
       }
-      // Bersihkan state agar tidak berulang
       window.history.replaceState({}, document.title);
     }
      }, [location, barang]);
 
   const data = barang || [];
-  const kategoriList = kategori || []; // UBAH: untuk dioper ke modal
-
-  // Filter data berdasarkan pencarian
+  const kategoriList = kategori || [];
   const filteredData = data.filter((item) =>
     item.nama_barang?.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -125,7 +122,6 @@ const handleHapus = async () => {
   }
 };
 
-  // Buka modal edit (UBAH: kirim kategori_id agar dropdown terisi)
   const openEditModal = (item) => {
     const itemForModal = {
       id: item.id,
@@ -217,7 +213,6 @@ const handleHapus = async () => {
         )}
       </div>
 
-      {/* UBAH: Tambahkan prop kategoriList ke kedua modal */}
       <TambahBarangModal
         isOpen={modalTambah}
         onClose={() => setModalTambah(false)}
@@ -236,11 +231,14 @@ const handleHapus = async () => {
       )}
 
       {selectedItem && (
-        <HapusBarangModal
+        <ConfirmModal
           isOpen={modalHapus}
           onClose={() => { setModalHapus(false); setSelectedItem(null); }}
           onConfirm={handleHapus}
-          namaBarang={selectedItem.nama || selectedItem.nama_barang}
+          title="Hapus Barang"
+          message={`Apakah kamu yakin akan menghapus produk "${selectedItem.nama || selectedItem.nama_barang}"?`}
+          confirmText="Hapus Barang"
+          confirmVariant="danger"
         />
       )}
     </div>

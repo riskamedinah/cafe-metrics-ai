@@ -10,16 +10,13 @@ class CustomResetPasswordNotification extends Notification
 {
     use Queueable;
 
-    // Ambil dan simpan token reset password
     public function __construct(public string $token) {}
 
-    // Kirim notifikasi ini via email
     public function via(object $notifiable): array
     {
         return ['mail'];
     }
 
-    // Mengatur isi dan tampilan pesan emailnya
     public function toMail(object $notifiable): MailMessage
     {
         $frontendUrl = config('app.frontend_url', 'http://localhost:3000');

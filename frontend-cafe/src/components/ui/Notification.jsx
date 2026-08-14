@@ -6,15 +6,15 @@ import {
   useRef,
   useEffect,
 } from "react";
-import { XCircle, AlertTriangle, Info, X } from "lucide-react";
+import { CheckCircle, XCircle, AlertTriangle, Info, X } from "lucide-react";
 
 const ToastContext = createContext(null);
 
 const TOAST_STYLES = {
-  success: { icon: null, color: "#3A72D2", bg: "#EAF0FC" },
-  error: { icon: XCircle, color: "#D8434E", bg: "#FCEAEB" },
-  warning: { icon: AlertTriangle, color: "#C77D1E", bg: "#FDF3E4" },
-  info: { icon: Info, color: "#3A72D2", bg: "#EAF0FC" },
+  success: { icon: CheckCircle, colorClass: "text-blue-600", bgClass: "bg-blue-50", barClass: "bg-blue-600" },
+  error: { icon: XCircle, colorClass: "text-red-500", bgClass: "bg-red-50", barClass: "bg-red-500" },
+  warning: { icon: AlertTriangle, colorClass: "text-amber-600", bgClass: "bg-amber-50", barClass: "bg-amber-600" },
+  info: { icon: Info, colorClass: "text-blue-600", bgClass: "bg-blue-50", barClass: "bg-blue-600" },
 };
 
 let idCounter = 0;
@@ -57,18 +57,7 @@ export const useToast = () => {
 const ToastViewport = ({ toasts, onClose }) => {
   if (toasts.length === 0) return null;
   return (
-    <div
-      style={{
-        position: "fixed",
-        bottom: 24,
-        right: 24,
-        display: "flex",
-        flexDirection: "column-reverse",
-        gap: 10,
-        zIndex: 100,
-        maxWidth: 360,
-      }}
-    >
+    <div className="fixed bottom-6 right-6 flex flex-col-reverse gap-2.5 z-50 w-full max-w-xs pointer-events-none">
       {toasts.map((t) => (
         <ToastItem key={t.id} toast={t} onClose={() => onClose(t.id)} />
       ))}
@@ -78,7 +67,7 @@ const ToastViewport = ({ toasts, onClose }) => {
 
 const ToastItem = ({ toast, onClose }) => {
   const { type, title, message, duration } = toast;
-  const { icon: Icon, color, bg } = TOAST_STYLES[type] ?? TOAST_STYLES.info;
+  const { icon: Icon, colorClass, bgClass, barClass } = TOAST_STYLES[type] ?? TOAST_STYLES.info;
 
   const [leaving, setLeaving] = useState(false);
   const [paused, setPaused] = useState(false);
@@ -88,7 +77,7 @@ const ToastItem = ({ toast, onClose }) => {
 
   const close = useCallback(() => {
     setLeaving(true);
-    setTimeout(onClose, 180);
+    setTimeout(onClose, 200);
   }, [onClose]);
 
   useEffect(() => {
@@ -107,45 +96,20 @@ const ToastItem = ({ toast, onClose }) => {
     <div
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
-      style={{
-        position: "relative",
-        overflow: "hidden",
-        display: "flex",
-        gap: 12,
-        alignItems: "flex-start",
-        background: "#fff",
-        borderRadius: 12,
-        boxShadow: "0 8px 24px rgba(0,0,0,0.14)",
-        padding: "14px 16px",
-        minWidth: 300,
-        animation: leaving
-          ? "toastOut 180ms ease forwards"
-          : "toastIn 220ms cubic-bezier(0.16,1,0.3,1)",
-      }}
+      className={`pointer-events-auto relative overflow-hidden flex gap-3 items-start bg-white rounded-xl shadow-lg p-3.5 transition-all duration-200 ease-in-out ${
+        leaving
+          ? "opacity-0 translate-x-4 scale-95"
+          : "opacity-100 translate-x-0 scale-100"
+      }`}
     >
-      {Icon && (
-        <div
-          style={{
-            flexShrink: 0,
-            width: 32,
-            height: 32,
-            borderRadius: "50%",
-            background: bg,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <Icon size={17} color={color} strokeWidth={2.2} />
-        </div>
-      )}
 
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontWeight: 700, fontSize: 14, color: "#1E1F24", lineHeight: 1.3 }}>
+
+      <div className="flex-1 min-w-0">
+        <div className="font-bold text-sm text-gray-900 leading-snug">
           {title}
         </div>
         {message ? (
-          <div style={{ fontSize: 13, color: "#5F637B", marginTop: 2, lineHeight: 1.4 }}>
+          <div className="text-xs text-gray-500 mt-0.5 leading-relaxed">
             {message}
           </div>
         ) : null}
@@ -154,50 +118,23 @@ const ToastItem = ({ toast, onClose }) => {
       <button
         onClick={close}
         aria-label="Tutup notifikasi"
-        style={{
-          background: "none",
-          border: "none",
-          cursor: "pointer",
-          padding: 2,
-          color: "#A6AABA",
-          display: "flex",
-          flexShrink: 0,
-        }}
+        className="bg-transparent border-0 cursor-pointer p-0.5 text-gray-400 hover:text-gray-600 flex shrink-0 transition-colors"
       >
         <X size={16} />
       </button>
 
+      {/* Progress Bar sederhana dengan CSS Transition */}
       {duration ? (
         <div
+          className={`absolute left-0 bottom-0 h-0.5 w-full origin-left opacity-60 ${barClass}`}
           style={{
-            position: "absolute",
-            left: 0,
-            bottom: 0,
-            height: 3,
-            width: "100%",
-            background: color,
-            opacity: 0.55,
-            transformOrigin: "left",
-            animationPlayState: paused ? "paused" : "running",
-            animation: leaving ? "none" : `toastShrink ${duration}ms linear forwards`,
+            transitionProperty: "transform",
+            transitionDuration: `${duration}ms`,
+            transitionTimingFunction: "linear",
+            transform: paused || leaving ? "scaleX(0)" : "scaleX(1)",
           }}
         />
       ) : null}
-
-      <style>{`
-        @keyframes toastIn {
-          from { opacity: 0; transform: translateX(16px) scale(0.98); }
-          to { opacity: 1; transform: translateX(0) scale(1); }
-        }
-        @keyframes toastOut {
-          from { opacity: 1; transform: translateX(0); }
-          to { opacity: 0; transform: translateX(16px); }
-        }
-        @keyframes toastShrink {
-          from { transform: scaleX(1); }
-          to { transform: scaleX(0); }
-        }
-      `}</style>
     </div>
   );
 };

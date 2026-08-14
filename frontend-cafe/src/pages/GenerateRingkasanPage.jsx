@@ -8,8 +8,6 @@ import { useData } from "../context/DataContext";
 const bulanSekarang = new Date().getMonth() + 1;
 const tahunSekarang = new Date().getFullYear();
 
-// Gabungkan hasil AI (ringkasan, rekomendasi, analisisTren) jadi satu teks bersih.
-// Ini yang disimpan ke kolom analisis_ai — bukan JSON lagi.
 const formatAnalisisAI = ({ detail, rekomendasi = [], analisisTren }) => {
   let text = (detail || "").trim();
 
@@ -31,76 +29,76 @@ const GenerateRingkasanPage = () => {
   const [tahun, setTahun] = useState(tahunSekarang);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [ringkasan, setRingkasan] = useState(null); // { detail, rekomendasi, analisisTren }
-  const [rawData, setRawData] = useState(null); // data statistik dari backend (untuk simpan)
+  const [ringkasan, setRingkasan] = useState(null);
+  const [rawData, setRawData] = useState(null);
   const [error, setError] = useState("");
 
   const { refreshRingkasan } = useData();
 
- const handleGenerate = async () => {
-  setLoading(true);
-  setError("");
-  try {
-    const res = await api.post("/ringkasan/hitung", { bulan, tahun });
-    if (!res.data.status) {
-      toast.error("Gagal menghitung statistik", res.data.message);
+  const handleGenerate = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const res = await api.post("/ringkasan/hitung", { bulan, tahun });
+      if (!res.data.status) {
+        toast.error("Gagal menghitung statistik", res.data.message);
+        setLoading(false);
+        return;
+      }
+      const data = res.data.data;
+      setRawData(data);
+
+      const aiRes = await api.post("/generate-ai", { raw_data_ai: data.raw_data_ai });
+      if (aiRes.data.status) {
+        const ai = aiRes.data.data;
+        setRingkasan({
+          detail: ai.ringkasan,
+          rekomendasi: ai.rekomendasi,
+          analisisTren: ai.analisis_tren,
+        });
+      } else {
+        toast.warning("AI tidak merespons", "Menampilkan ringkasan dasar dari data statistik");
+        setRingkasan({
+          detail: `Total omzet bulan ini Rp ${data.total_omzet.toLocaleString('id-ID')} dengan ${data.total_item_terjual} item terjual.`,
+          rekomendasi: ["Coba lagi nanti"],
+          analisisTren: "Data tidak dapat dianalisis oleh AI.",
+        });
+      }
+    } catch (err) {
+      toast.error("Terjadi kesalahan", err.response?.data?.message);
+    } finally {
       setLoading(false);
-      return;
     }
-    const data = res.data.data;
-    setRawData(data);
+  };
 
-    const aiRes = await api.post("/generate-ai", { raw_data_ai: data.raw_data_ai });
-    if (aiRes.data.status) {
-      const ai = aiRes.data.data;
-      setRingkasan({
-        detail: ai.ringkasan,
-        rekomendasi: ai.rekomendasi,
-        analisisTren: ai.analisis_tren,
+  const handleSave = async () => {
+    if (!rawData) return;
+    setSaving(true);
+    try {
+      const analisisAi = formatAnalisisAI(ringkasan);
+      const res = await api.post("/ringkasan", {
+        bulan: rawData.bulan,
+        tahun: rawData.tahun,
+        total_penjualan: rawData.total_penjualan,
+        total_omzet: rawData.total_omzet,
+        total_item_terjual: rawData.total_item_terjual,
+        analisis_ai: analisisAi,
       });
-    } else {
-      toast.warning("AI tidak merespons", "Menampilkan ringkasan dasar dari data statistik");
-      setRingkasan({
-        detail: `Total omzet bulan ini Rp ${data.total_omzet.toLocaleString('id-ID')} dengan ${data.total_item_terjual} item terjual.`,
-        rekomendasi: ["Coba lagi nanti"],
-        analisisTren: "Data tidak dapat dianalisis oleh AI.",
-      });
-    }
-  } catch (err) {
-    toast.error("Terjadi kesalahan", err.response?.data?.message);
-  } finally {
-    setLoading(false);
-  }
-};
 
-const handleSave = async () => {
-  if (!rawData) return;
-  setSaving(true);
-  try {
-    const analisisAi = formatAnalisisAI(ringkasan);
-    const res = await api.post("/ringkasan", {
-      bulan: rawData.bulan,
-      tahun: rawData.tahun,
-      total_penjualan: rawData.total_penjualan,
-      total_omzet: rawData.total_omzet,
-      total_item_terjual: rawData.total_item_terjual,
-      analisis_ai: analisisAi,
-    });
-
-    if (res.data.status) {
-      toast.success("Ringkasan disimpan", "Data berhasil disimpan");
-      refreshRingkasan();
-      setRingkasan(null);
-      setRawData(null);
-    } else {
-      toast.error("Gagal menyimpan ringkasan", res.data.message);
+      if (res.data.status) {
+        toast.success("Ringkasan disimpan", "Data berhasil disimpan");
+        refreshRingkasan();
+        setRingkasan(null);
+        setRawData(null);
+      } else {
+        toast.error("Gagal menyimpan ringkasan", res.data.message);
+      }
+    } catch (err) {
+      toast.error("Gagal menyimpan", err.response?.data?.message);
+    } finally {
+      setSaving(false);
     }
-  } catch (err) {
-    toast.error("Gagal menyimpan", err.response?.data?.message);
-  } finally {
-    setSaving(false);
-  }
-};
+  };
 
   const handleReset = () => {
     setRingkasan(null);
@@ -114,11 +112,12 @@ const handleSave = async () => {
   }));
 
   return (
-    <div style={{ padding: "32px", background: "#F4F5F7", minHeight: "100vh", fontFamily: "'Geist Variable', 'Inter', sans-serif" }}>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "24px" }}>
-        <h2 style={{ fontSize: "22px", fontWeight: 500, color: "#1E1F24", margin: 0 }}>AI Generate Ringkasan</h2>
-        <div style={{ display: "flex", gap: "12px" }}>
-          <div style={{ minWidth: 180 }}>
+    <div className="p-8 bg-neutral-50 min-h-screen font-sans">
+      {/* Header & Controls */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+        <h2 className="text-2xl font-medium text-[#1E1F24]">AI Generate Ringkasan</h2>
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="min-w-45">
             <SelectField
               label=""
               name="bulan"
@@ -129,47 +128,84 @@ const handleSave = async () => {
               required
             />
           </div>
-          <input type="number" value={tahun} onChange={(e) => setTahun(Number(e.target.value))}
-            style={{ padding: "8px 12px", borderRadius: 8, border: "1px solid #DDE1E7", background: "#fff", fontSize: 14, width: 80 }} />
-          <button onClick={handleGenerate} disabled={loading}
-            style={{ display: "flex", alignItems: "center", gap: 8, background: "#3A72D4", color: "#fff", border: "none", borderRadius: 8, padding: "10px 20px", fontSize: 15, fontWeight: 500, cursor: loading ? "not-allowed" : "pointer", opacity: loading ? 0.75 : 1 }}>
-            {loading ? "Menghasilkan..." : <><Sparkles size={25} /> Generate</>}
+          <input
+            type="number"
+            value={tahun}
+            onChange={(e) => setTahun(Number(e.target.value))}
+            className="p-2 w-20 rounded-lg border border-[#DDE1E7] bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#3A72D4]"
+          />
+          <button
+            onClick={handleGenerate}
+            disabled={loading}
+            className="flex items-center gap-2 bg-[#3A72D4] hover:bg-[#2e5eb3] text-white rounded-lg px-5 py-2.5 text-base font-medium transition-colors disabled:opacity-75 disabled:cursor-not-allowed"
+          >
+            {loading ? (
+              "Menghasilkan..."
+            ) : (
+              <>
+                <Sparkles size={25} /> Generate
+              </>
+            )}
           </button>
         </div>
       </div>
 
-      {error && <div style={{ color: "red", marginBottom: 16 }}>{error}</div>}
+      {error && <div className="text-red-500 mb-4">{error}</div>}
 
+      {/* Result Section */}
       {ringkasan && (
         <>
-          <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-            <Card icon={<Package size={25} color="#3A72D4" />} title="Ringkasan" subtitle="Data periode bulan ini">
-              <p style={{ fontSize: 15, color: "#4B5563", margin: 0 }}>{ringkasan.detail}</p>
+          <div className="flex flex-col gap-4">
+            <Card
+              icon={<Package size={25} className="text-[#3A72D4]" />}
+              title="Ringkasan"
+              subtitle="Data periode bulan ini"
+            >
+              <p className="text-base text-gray-600 m-0">{ringkasan.detail}</p>
             </Card>
 
-            <Card icon={<Info size={25} color="#3A72D4" />} title="Rekomendasi" subtitle="Insight untuk meningkatkan performa">
-              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            <Card
+              icon={<Info size={25} className="text-[#3A72D4]" />}
+              title="Rekomendasi"
+              subtitle="Insight untuk meningkatkan performa"
+            >
+              <div className="flex flex-col gap-2">
                 {ringkasan.rekomendasi.map((item, idx) => (
-                  <div key={idx} style={{ display: "flex", alignItems: "flex-start", gap: 10, background: "#F4F5F7", borderRadius: 8, padding: "12px 14px", fontSize: 15, color: "#4B5563" }}>
-                    <span style={{ color: "#9DA3AE", fontSize: 14, flexShrink: 0, marginTop: 1 }}>•</span>
+                  <div
+                    key={idx}
+                    className="flex items-start gap-2.5 bg-neutral-50 rounded-lg p-3 text-base text-gray-600"
+                  >
+                    <span className="text-gray-400 text-sm shrink-0 mt-0.5">•</span>
                     <span>{item}</span>
                   </div>
                 ))}
               </div>
             </Card>
 
-            <Card icon={<TrendingUp size={25} color="#3A72D4" />} title="Analisis Tren" subtitle="Insight Performa Produk">
-              <p style={{ fontSize: 15, color: "#4B5563", lineHeight: 1.75, margin: 0 }}>{ringkasan.analisisTren}</p>
+            <Card
+              icon={<TrendingUp size={25} className="text-[#3A72D4]" />}
+              title="Analisis Tren"
+              subtitle="Insight Performa Produk"
+            >
+              <p className="text-base text-gray-600 leading-relaxed m-0">
+                {ringkasan.analisisTren}
+              </p>
             </Card>
           </div>
 
-          <div style={{ display: "flex", gap: 12, marginTop: 24 }}>
-            <button onClick={handleSave} disabled={saving}
-              style={{ display: "flex", alignItems: "center", gap: 8, background: "#059669", color: "#fff", border: "none", borderRadius: 8, padding: "10px 20px", fontSize: 15, fontWeight: 500, cursor: saving ? "not-allowed" : "pointer" }}>
+          {/* Action Buttons */}
+          <div className="flex items-center gap-3 mt-6">
+            <button
+              onClick={handleSave}
+              disabled={saving}
+              className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg px-5 py-2.5 text-base font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-75"
+            >
               <Save size={20} /> Simpan Ringkasan
             </button>
-            <button onClick={handleReset}
-              style={{ padding: "10px 20px", background: "#fff", border: "1px solid #DDE1E7", borderRadius: 8, fontSize: 15, color: "black", cursor: "pointer" }}>
+            <button
+              onClick={handleReset}
+              className="px-5 py-2.5 bg-white border border-[#DDE1E7] hover:bg-gray-50 rounded-lg text-base text-black transition-colors"
+            >
               Reset
             </button>
           </div>
@@ -180,14 +216,14 @@ const handleSave = async () => {
 };
 
 const Card = ({ icon, title, subtitle, children }) => (
-  <div style={{ background: "#fff", borderRadius: 12, border: "1px solid #E8E9EC", padding: 24 }}>
-    <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 16 }}>
-      <div style={{ width: 44, height: 44, borderRadius: "25%", background: "#EEF2FF", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+  <div className="bg-white rounded-xl border border-[#E8E9EC] p-6">
+    <div className="flex items-center gap-3.5 mb-4">
+      <div className="w-11 h-11 rounded-xl bg-indigo-50 flex items-center justify-center shrink-0">
         {icon}
       </div>
       <div>
-        <div style={{ fontSize: 18, fontWeight: 500, color: "#1E1F24" }}>{title}</div>
-        <div style={{ fontSize: 15, color: "#4B5563", marginTop: 2 }}>{subtitle}</div>
+        <div className="text-lg font-medium text-[#1E1F24]">{title}</div>
+        <div className="text-base text-gray-600 mt-0.5">{subtitle}</div>
       </div>
     </div>
     {children}

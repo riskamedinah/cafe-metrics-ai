@@ -1,6 +1,7 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { useData } from '../context/DataContext'
 import api from '../lib/axios'
 import AuthLayout from '../components/layouts/AuthLayout'
 import InputField from '../components/ui/InputField'
@@ -8,22 +9,13 @@ import PasswordField from '../components/ui/PasswordField'
 
 const LoginPage = () => {
   const { login } = useAuth()
+  const { preloadInitialData } = useData()
   const navigate = useNavigate()
-  const formRef = useRef(null)
 
   const [form, setForm] = useState({ email: '', password: '' })
   const [remember, setRemember] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-
-  useEffect(() => {
-    if (formRef.current) {
-      formRef.current.scrollIntoView({
-        behavior: 'smooth',
-        block: 'center',
-      })
-    }
-  }, [])
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value })
@@ -38,6 +30,7 @@ const LoginPage = () => {
       const res = await api.post('/login', form)
       if (res.data.status) {
         login(res.data.data.user, res.data.data.access_token, remember)
+        await preloadInitialData()
         navigate('/dashboard')
       } else {
         setError(res.data.message)
@@ -51,8 +44,7 @@ const LoginPage = () => {
 
   return (
     <AuthLayout>
-      <div ref={formRef} className="w-full max-w-lg">
-        {/* Header */}
+      <div className="w-full max-w-lg">
         <div className="text-center mb-5">
           <h2 className="text-2xl font-medium text-gray-900">Login</h2>
           <p className="text-gray-500 text-md mt-1">
@@ -105,7 +97,7 @@ const LoginPage = () => {
             disabled={loading}
             className="w-full bg-[#3A72D4] hover:bg-[#3451c7] text-white py-2.5 rounded-lg font-medium text-sm transition disabled:opacity-60 disabled:cursor-not-allowed"
           >
-            {loading ? 'Memproses...' : 'Login'}
+            Login
           </button>
         </form>
 

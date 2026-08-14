@@ -1,8 +1,14 @@
-import { useState } from "react";
-import BaseModal from "../ui/BaseModal";
+import React, { useState, useEffect } from "react";
+import BaseModal from "./BaseModal";
 
 const TambahKategoriModal = ({ isOpen, onClose, onSave }) => {
   const [nama, setNama] = useState("");
+
+  useEffect(() => {
+    if (!isOpen) {
+      setNama("");
+    }
+  }, [isOpen]);
 
   const handleSave = () => {
     if (!nama.trim()) return;
@@ -11,82 +17,43 @@ const TambahKategoriModal = ({ isOpen, onClose, onSave }) => {
     onClose();
   };
 
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handleSave();
+    }
+  };
+
   return (
-    <BaseModal isOpen={isOpen} onClose={onClose} title="Tambah Kategori" maxWidth="460px">
-      <div style={{ padding: "20px 24px" }}>
-        <label
-          style={{
-            display: "block",
-            fontSize: "13px",
-            fontWeight: 500,
-            color: "#374151",
-            marginBottom: 6,
-          }}
-        >
+    <BaseModal isOpen={isOpen} onClose={onClose} title="Tambah Kategori" maxWidth="max-w-md">
+      <div className="p-5 sm:p-6">
+        <label className="block text-xs font-semibold text-gray-700 mb-1.5">
           Nama Kategori
         </label>
         <input
-          style={{
-            width: "100%",
-            padding: "10px 12px",
-            border: "1px solid #DDE1E7",
-            borderRadius: "8px",
-            fontSize: "13px",
-            color: "#1E1F24",
-            outline: "none",
-            boxSizing: "border-box",
-            fontFamily: "inherit",
-            background: "#fff",
-          }}
+          className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-xs text-gray-900 outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition-all"
           placeholder="Masukkan nama kategori"
           value={nama}
           onChange={(e) => setNama(e.target.value)}
-          onFocus={(e) => (e.target.style.borderColor = "#3A72D4")}
-          onBlur={(e) => (e.target.style.borderColor = "#DDE1E7")}
+          onKeyDown={handleKeyDown}
+          autoFocus
         />
       </div>
 
-      <div style={{ height: "1px", background: "#F0F1F3" }} />
+      <div className="h-px bg-gray-100" />
 
-      <div
-        style={{
-          padding: "16px 24px",
-          display: "flex",
-          justifyContent: "flex-end",
-          gap: 10,
-        }}
-      >
+      <div className="p-4 sm:px-6 flex justify-end gap-2.5">
         <button
+          type="button"
           onClick={onClose}
-          style={{
-            padding: "9px 20px",
-            border: "1px solid #DDE1E7",
-            borderRadius: "8px",
-            background: "#fff",
-            fontSize: "13px",
-            fontWeight: 500,
-            color: "#374151",
-            cursor: "pointer",
-            fontFamily: "inherit",
-          }}
+          className="px-5 py-2 border border-gray-300 rounded-lg bg-white text-xs font-medium text-gray-700 hover:bg-gray-50 transition-colors"
         >
           Batal
         </button>
         <button
+          type="button"
           onClick={handleSave}
-          style={{
-            padding: "9px 20px",
-            border: "none",
-            borderRadius: "8px",
-            background: "#3A72D4",
-            fontSize: "13px",
-            fontWeight: 600,
-            color: "#fff",
-            cursor: "pointer",
-            fontFamily: "inherit",
-          }}
-          onMouseEnter={(e) => (e.currentTarget.style.background = "#3451C7")}
-          onMouseLeave={(e) => (e.currentTarget.style.background = "#3A72D4")}
+          className="px-5 py-2 border-none rounded-lg bg-blue-600 text-xs font-semibold text-white hover:bg-blue-700 transition-colors"
         >
           Tambah Kategori
         </button>

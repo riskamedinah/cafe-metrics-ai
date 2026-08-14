@@ -2,9 +2,9 @@ import { useState, useEffect } from "react";
 import { SquarePen, Trash2 } from "lucide-react";
 import BaseSearch from "../components/ui/BaseSearch";
 import BaseTable from "../components/ui/BaseTable";
-import Pagination from "../components/ui/Pagination"; // 👈 Impor Pagination
+import Pagination from "../components/ui/Pagination";
+import ConfirmModal from "../components/modals/ConfirmModal";
 import EditPenjualanModal from "../components/modals/EditPenjualanModal";
-import HapusPenjualanModal from "../components/modals/HapusPenjualanModal";
 import api from "../lib/axios";
 import { useToast } from "../components/ui/Notification";
 import { useData } from "../context/DataContext";
@@ -18,7 +18,6 @@ const bulanIni = () => {
 
 export default function ManagementPenjualan() {
   const toast = useToast();
-  // 👈 Ambil penjualanMeta
   const { penjualan, penjualanMeta, fetchPenjualan, refreshPenjualan, loadingPenjualan } = useData(); 
   const [search, setSearch] = useState("");
   const [editItem, setEditItem] = useState(null);
@@ -87,13 +86,13 @@ export default function ManagementPenjualan() {
     <div className="flex items-center gap-3">
       <button
         onClick={() => setEditItem(item)}
-        className="text-amber-500 hover:text-amber-600"
+        className="text-amber-500 hover:text-amber-600 transition-colors"
       >
         <SquarePen size={16} />
       </button>
       <button
         onClick={() => setHapusItem(item)}
-        className="text-rose-500 hover:text-rose-600"
+        className="text-rose-500 hover:text-rose-600 transition-colors"
       >
         <Trash2 size={16} />
       </button>
@@ -101,7 +100,7 @@ export default function ManagementPenjualan() {
   );
 
   return (
-    <div style={{ padding: "32px 40px", maxWidth: 1400, margin: "0 auto", background: "#F4F5F7", minHeight: "100vh" }}>
+    <div className="py-8 px-10 max-w-350 mx-auto bg-neutral-50 min-h-screen">
       <div className="flex flex-col sm:flex-row items-start justify-between gap-4 w-full mb-4">
         <BaseSearch
           value={search}
@@ -110,7 +109,7 @@ export default function ManagementPenjualan() {
         />
       </div>
 
-      <div className="bg-white rounded-xl p-6 shadow-sm">
+      <div className="bg-white rounded-xl p-6 shadow-sm border border-neutral-100">
         <h2 className="text-base font-semibold text-neutral-900">Riwayat Penjualan</h2>
         <p className="mb-5 text-sm text-neutral-400">{bulanIni()}</p>
 
@@ -129,7 +128,6 @@ export default function ManagementPenjualan() {
               actionRow={actionRow}
             />
             
-            {/* 👈 Pasang Komponen Pagination di bawah Tabel */}
             {!search && (
               <div className="mt-4 flex justify-end">
                 <Pagination
@@ -153,11 +151,14 @@ export default function ManagementPenjualan() {
       )}
 
       {hapusItem && (
-        <HapusPenjualanModal
+        <ConfirmModal
           isOpen={!!hapusItem}
-          item={hapusItem}
           onClose={() => setHapusItem(null)}
-          onConfirm={(id) => handleHapus(id)}
+          onConfirm={() => handleHapus(hapusItem.id)}
+          title="Hapus Penjualan"
+          message={`Apakah kamu yakin akan menghapus produk "${hapusItem.namaProduk}"?`}
+          confirmText="Hapus Penjualan"
+          confirmVariant="danger"
         />
       )}
     </div>

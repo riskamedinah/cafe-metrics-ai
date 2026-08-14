@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import BarangCard from "../components/ui/BarangCard";
-import BeliBarangModal from "../components/modals/BeliBarangModal"; // tambah ini
+import BeliBarangModal from "../components/modals/BeliBarangModal";
 import { useToast } from "../components/ui/Notification";
 import { useData } from "../context/DataContext";
 import EmptyState from "../components/ui/EmptyState";
@@ -8,7 +8,7 @@ import LoadingState from "../components/ui/LoadingState";
 
 export default function BarangPage() {
   const { barang, fetchBarang, loadingBarang } = useData();
-  const [modalBeli, setModalBeli] = useState(null); // tambah ini — nyimpen item yang mau dibeli
+  const [modalBeli, setModalBeli] = useState(null);
 
   useEffect(() => {
     fetchBarang();
@@ -26,26 +26,26 @@ export default function BarangPage() {
     : [];
 
   const handleBeli = (item) => {
-    setModalBeli(item); // ganti alert() jadi buka modal
+    setModalBeli(item);
   };
 
   if (loadingBarang && dataBarang.length === 0) {
     return (
-      <div style={{ padding: 32, background: "#F4F5F7", minHeight: "100vh" }}>
+      <div className="p-8 bg-neutral-50 min-h-screen">
         <LoadingState text="Memuat data barang..." />
       </div>
     );
   }
 
   return (
-    <div style={{ padding: "32px", background: "#F4F5F7", minHeight: "100vh", fontFamily: "'Geist Variable', 'Inter', sans-serif" }}>
+    <div className="p-8 bg-neutral-50 min-h-screen font-sans">
       {dataBarang.length === 0 ? (
         <EmptyState
           title="Belum ada produk"
           description="Tidak ada barang yang tersedia untuk dibeli saat ini."
         />
       ) : (
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: "20px" }}>
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-5">
           {dataBarang.map((item) => (
             <BarangCard key={item.id} item={item} onBeli={handleBeli} />
           ))}
@@ -56,7 +56,7 @@ export default function BarangPage() {
         isOpen={!!modalBeli}
         item={modalBeli}
         onClose={() => setModalBeli(null)}
-        onSuccess={() => fetchBarang()} // atau refreshPenjualan() kalau ada di context
+        onSuccess={() => fetchBarang()}
       />
     </div>
   );

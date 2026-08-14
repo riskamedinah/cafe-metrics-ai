@@ -5,7 +5,7 @@ import BaseTable from "../components/ui/BaseTable";
 import CreateButton from "../components/ui/CreateButton";
 import TambahKategoriModal from "../components/modals/TambahKategoriModal";
 import EditKategoriModal from "../components/modals/EditKategoriModal";
-import HapusKategoriModal from "../components/modals/HapusKategoriModal";
+import ConfirmModal from "../components/modals/ConfirmModal";
 import EmptyState from "../components/ui/EmptyState";
 import { useData } from "../context/DataContext";
 import { useToast } from "../components/ui/Notification";
@@ -18,7 +18,6 @@ const bulanIni = () => {
 };
 
 const KategoriPage = () => {
-  // UBAH: gunakan context
   const { kategori, fetchKategori, refreshKategori, loadingKategori } = useData();
   const toast = useToast()
   const [searchQuery, setSearchQuery] = useState("");
@@ -131,7 +130,17 @@ const KategoriPage = () => {
 
       <TambahKategoriModal isOpen={modalTambah} onClose={() => setModalTambah(false)} onSave={handleTambah} />
       <EditKategoriModal isOpen={!!editItem} item={editItem} onClose={() => setEditItem(null)} onSave={handleEdit} />
-      <HapusKategoriModal isOpen={!!hapusItem} item={hapusItem} onClose={() => setHapusItem(null)} onConfirm={() => handleHapus(hapusItem.id)} />
+      {hapusItem && (
+        <ConfirmModal
+          isOpen={!!hapusItem}
+          onClose={() => setHapusItem(null)}
+          onConfirm={() => handleHapus(hapusItem.id)}
+          title="Hapus Kategori"
+          message={`Apakah kamu yakin akan menghapus kategori "${hapusItem.nama_kategori}"?`}
+          confirmText="Hapus Kategori"
+          confirmVariant="danger"
+        />
+      )}
     </div>
   );
 };

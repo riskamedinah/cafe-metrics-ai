@@ -20,7 +20,6 @@ const AuthBanner = () => {
         </h1>
       </div>
 
-      {/* Gambar dashboard – tetap di kanan bawah, responsif */}
       <div className="flex flex-1 items-end justify-end">
         <div className="w-full mt-10 overflow-hidden">
           <img

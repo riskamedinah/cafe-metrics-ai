@@ -25,7 +25,6 @@ const ResetPasswordPage = () => {
     if (formRef.current) {
       formRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' })
     }
-    // Jika tidak ada token di URL, arahkan ke halaman lupa password
     if (!token) {
       navigate('/forgot-password', { replace: true })
     }
@@ -66,7 +65,7 @@ const ResetPasswordPage = () => {
   }
 
   if (!token) {
-    return null // atau loading
+    return null
   }
 
   return (
@@ -117,7 +116,7 @@ const ResetPasswordPage = () => {
             disabled={loading || success}
             className="w-full bg-[#3A72D4] hover:bg-[#3451c7] text-white py-2.5 rounded-lg font-medium text-sm transition disabled:opacity-60 disabled:cursor-not-allowed"
           >
-            {loading ? 'Memproses...' : 'Reset Password'}
+            Reset Password
           </button>
         </form>
 

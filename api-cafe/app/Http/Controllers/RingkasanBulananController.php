@@ -142,7 +142,6 @@ class RingkasanBulananController extends Controller
         return response()->json(['status' => false, 'message' => 'Gemini API key tidak ditemukan'], 500);
     }
 
-    // 1. Kunci prompt agar fokus ke angka dan stok produk saja
     $prompt = "Kamu adalah sistem analisis data penjualan yang kaku, objektif, dan hanya fokus pada angka. Tugasmu adalah meringkas data transaksi yang diberikan.\n\n" .
               "ATURAN KETAT:\n" .
               "1. DILARANG MEMBERIKAN SARAN STRATEGIS/BISNIS DI LUAR DATA (Jangan menyuruh mengubah konsep bisnis, melakukan survei, mengevaluasi toko, atau memberi saran promosi makro).\n" .
@@ -158,7 +157,6 @@ class RingkasanBulananController extends Controller
               "}\n\n" .
               "Hanya kembalikan JSON, tanpa teks penjelasan lain di luar JSON.";
 
-    // 2. Gunakan model Gemini 3.1 Flash Lite yang kuotanya aktif
     $model = 'gemini-3.1-flash-lite'; 
 
     try {
@@ -172,8 +170,8 @@ class RingkasanBulananController extends Controller
                     ]
                 ],
                 'generationConfig' => [
-                    'temperature' => 0.0, // Dipaksa 0.0 agar jawaban kaku dan patuh pada prompt
-                    'responseMimeType' => 'application/json', // Memaksa server Gemini merespons format JSON murni
+                    'temperature' => 0.0,
+                    'responseMimeType' => 'application/json',
                 ],
             ]);
 
@@ -195,7 +193,6 @@ class RingkasanBulananController extends Controller
             return response()->json(['status' => false, 'message' => 'Respons AI kosong'], 500);
         }
 
-        // 3. Bersihkan pembungkus markdown jika AI tidak sengaja menyertakannya
         $text = trim($text);
         if (preg_match('/```json\s*(.*?)\s*```/s', $text, $matches)) {
             $text = $matches[1];
@@ -206,7 +203,6 @@ class RingkasanBulananController extends Controller
             return response()->json(['status' => false, 'message' => 'Format respons AI tidak valid'], 500);
         }
 
-        // 4. Return data bersih ke frontend (React/Flutter/Blade) siap pakai di UI kamu
         return response()->json([
             'status' => true,
             'message' => 'Analisis AI berhasil',

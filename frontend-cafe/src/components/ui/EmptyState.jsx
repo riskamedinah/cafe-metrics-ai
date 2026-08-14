@@ -7,25 +7,16 @@ const EmptyState = ({
   actionButton,
 }) => {
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "48px 24px",
-        textAlign: "center",
-        background: "#ffffff",
-        borderRadius: "12px",
-        border: "1px dashed #E5E7EB",
-      }}
-    >
+    <div className="flex flex-col items-center justify-center p-12 text-center bg-white rounded-xl border border-dashed border-gray-200">
+      <div className="w-12 h-12 rounded-full bg-gray-50 flex items-center justify-center mb-4 text-gray-400">
+        <FolderOpen size={24} />
+      </div>
 
-      <h4 style={{ fontSize: "16px", fontWeight: 600, color: "#1E1F24", margin: "0 0 6px 0" }}>
+      <h4 className="text-base font-semibold text-gray-900 mb-1.5">
         {title}
       </h4>
 
-      <p style={{ fontSize: "14px", color: "#6B7280", margin: "0 0 20px 0", maxWidth: "320px" }}>
+      <p className="text-sm text-gray-500 mb-5 max-w-xs leading-relaxed">
         {description}
       </p>
 

@@ -1,17 +1,16 @@
 import { useState, useEffect } from "react";
-import BaseModal from "../ui/BaseModal";
+import BaseModal from "./BaseModal";
 
 const EditPenjualanModal = ({ isOpen, item, onClose, onSave }) => {
   const [namaBarang, setNamaBarang] = useState("");
   const [jumlah, setJumlah] = useState("");
 
-  // Efek untuk mengisi ulang form saat item berubah
   useEffect(() => {
-    if (item) {
+    if (isOpen && item) {
       setNamaBarang(item.namaProduk ?? "");
       setJumlah(item.jumlah ?? "");
     }
-  }, [item]);
+  }, [item, isOpen]);
 
   const handleSave = () => {
     if (!namaBarang.trim() || !jumlah) return;
@@ -20,49 +19,46 @@ const EditPenjualanModal = ({ isOpen, item, onClose, onSave }) => {
   };
 
   return (
-    <BaseModal isOpen={isOpen} onClose={onClose} title="Edit Penjualan" maxWidth="460px">
-      {/* Body */}
-      <div style={{ padding: "20px 24px" }}>
-        <label style={{ display: "block", fontSize: "13px", fontWeight: 500, color: "#374151", marginBottom: 6 }}>
+    <BaseModal isOpen={isOpen} onClose={onClose} title="Edit Penjualan" maxWidth="max-w-md">
+      <div className="p-5 px-6">
+        <label className="mb-1.5 block text-xs font-medium text-neutral-800">
           Nama Barang
         </label>
         <input
-          style={{ width: "100%", padding: "10px 12px", border: "1px solid #DDE1E7", borderRadius: "8px", fontSize: "13px", color: "#1E1F24", outline: "none", boxSizing: "border-box", fontFamily: "inherit", background: "#fff" }}
+          type="text"
           placeholder="Masukkan nama barang"
           value={namaBarang}
           onChange={(e) => setNamaBarang(e.target.value)}
-          onFocus={(e) => (e.target.style.borderColor = "#3A72D4")}
-          onBlur={(e) => (e.target.style.borderColor = "#DDE1E7")}
+          className="w-full rounded-lg border border-neutral-200 bg-white px-3 py-2.5 text-xs text-neutral-900 outline-none focus:border-primary"
         />
 
-        <label style={{ display: "block", fontSize: "13px", fontWeight: 500, color: "#374151", marginBottom: 6, marginTop: 16 }}>
+        <label className="mt-4 mb-1.5 block text-xs font-medium text-neutral-800">
           Jumlah Barang
         </label>
         <input
-          style={{ width: "100%", padding: "10px 12px", border: "1px solid #DDE1E7", borderRadius: "8px", fontSize: "13px", color: "#1E1F24", outline: "none", boxSizing: "border-box", fontFamily: "inherit", background: "#fff" }}
           type="number"
           min={1}
           placeholder="Masukkan jumlah barang"
           value={jumlah}
           onChange={(e) => setJumlah(e.target.value)}
-          onFocus={(e) => (e.target.style.borderColor = "#3A72D4")}
-          onBlur={(e) => (e.target.style.borderColor = "#DDE1E7")}
+          className="w-full rounded-lg border border-neutral-200 bg-white px-3 py-2.5 text-xs text-neutral-900 outline-none focus:border-primary"
         />
       </div>
 
-      {/* Garis Pembatas Bawah */}
-      <div style={{ height: "1px", background: "#F0F1F3" }} />
+      <div className="h-px bg-neutral-100" />
 
-      {/* Footer */}
-      <div style={{ padding: "16px 24px", display: "flex", justifyContent: "flex-end", gap: 10 }}>
-        <button onClick={onClose} style={{ padding: "9px 20px", border: "1px solid #DDE1E7", borderRadius: "8px", background: "#fff", fontSize: "13px", fontWeight: 500, color: "#374151", cursor: "pointer", fontFamily: "inherit" }}>
+      <div className="flex justify-end gap-2.5 p-4 px-6">
+        <button
+          type="button"
+          onClick={onClose}
+          className="cursor-pointer rounded-lg border border-neutral-200 bg-white px-5 py-2.25 text-xs font-medium text-neutral-800 hover:bg-neutral-50"
+        >
           Batal
         </button>
         <button
+          type="button"
           onClick={handleSave}
-          style={{ padding: "9px 20px", border: "none", borderRadius: "8px", background: "#3A72D4", fontSize: "13px", fontWeight: 600, color: "#fff", cursor: "pointer", fontFamily: "inherit" }}
-          onMouseEnter={(e) => (e.currentTarget.style.background = "#3451C7")}
-          onMouseLeave={(e) => (e.currentTarget.style.background = "#3A72D4")}
+          className="cursor-pointer rounded-lg bg-primary px-5 py-2.25 text-xs font-semibold text-white transition-colors hover:bg-primary-hover"
         >
           Edit Penjualan
         </button>

@@ -91,7 +91,6 @@ public function update(Request $request, int $id): JsonResponse
         ], 404);
     }
 
-    // Validasi dulu
     $validated = $request->validate([
         'kategori_id' => 'required|exists:kategoris,id',
         'nama_barang' => 'required|string|max:255',
@@ -101,9 +100,24 @@ public function update(Request $request, int $id): JsonResponse
         'foto_barang' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
     ]);
 
-    // Proses upload jika ada file baru
+    if (!$barang) {
+        return response()->json([
+            'status' => false,
+            'message' => 'Barang tidak ditemukan',
+            'data' => null,
+        ], 404);
+    }
+
+    $validated = $request->validate([
+        'kategori_id' => 'required|exists:kategoris,id',
+        'nama_barang' => 'required|string|max:255',
+        'harga_barang' => 'required|integer|min:0',
+        'stok_barang' => 'required|integer|min:0',
+        'deskripsi_barang' => 'nullable|string',
+        'foto_barang' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+    ]);
+
     if ($request->hasFile('foto_barang')) {
-        // Hapus foto lama dari Cloudinary jika ada
         if ($barang->foto_public_id) {
             Cloudinary::uploadApi()->destroy($barang->foto_public_id);
         }
@@ -116,7 +130,6 @@ public function update(Request $request, int $id): JsonResponse
         $barang->foto_public_id = $uploadResult['public_id'];
     }
 
-    // Update data barang
     $barang->update([
         'kategori_id' => $validated['kategori_id'],
         'nama_barang' => $validated['nama_barang'],

@@ -12,120 +12,54 @@ const BarangCard = ({ item, onBeli }) => {
   };
 
   return (
-    <div
-      style={{
-        background: "#ffffff",
-        borderRadius: "16px",
-        padding: "15px",
-        display: "flex",
-        flexDirection: "column",
-        boxShadow: "0 1px 2px rgba(0,0,0,0.04)",
-        transition: "transform 0.15s ease, box-shadow 0.15s ease",
-      }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.transform = "translateY(-2px)";
-        e.currentTarget.style.boxShadow = "0 4px 12px rgba(0,0,0,0.08)";
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.transform = "translateY(0)";
-        e.currentTarget.style.boxShadow = "0 1px 2px rgba(0,0,0,0.04)";
-      }}
-    >
-      {/* Image Area */}
-      <div
-        style={{
-          background: "#F4F5F7",
-          aspectRatio: "3 / 2",
-          borderRadius: "10px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          overflow: "hidden",
-          marginBottom: "16px",
-        }}
-      >
+    <div className="bg-white rounded-2xl p-3.5 flex flex-col shadow-sm hover:-translate-y-0.5 hover:shadow-md transition-all duration-150 ease-in-out">
+      {/* Container Gambar - Pakai aspect-video bawaan Tailwind */}
+      <div className="bg-gray-100 aspect-video rounded-lg flex items-center justify-center overflow-hidden mb-4">
         {!imgError ? (
           <img
             src={item.gambar}
             alt={item.nama}
             onError={() => setImgError(true)}
-            style={{
-              width: "100%",
-              height: "100%",
-              objectFit: "cover",
-            }}
+            className="w-full h-full object-cover"
           />
         ) : (
-          <div
-            style={{
-              width: 64,
-              height: 64,
-              borderRadius: 8,
-              background: "#DDE1E7",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <svg width="28" height="28" fill="none" viewBox="0 0 24 24">
-              <rect x="3" y="3" width="18" height="18" rx="3" stroke="#9DA3AE" strokeWidth="1.5" />
-              <circle cx="8.5" cy="8.5" r="1.5" fill="#9DA3AE" />
-              <path d="M3 15l5-5 4 4 3-3 6 6" stroke="#9DA3AE" strokeWidth="1.5" strokeLinejoin="round" />
+          <div className="w-16 h-16 rounded-lg bg-gray-200 flex items-center justify-center">
+            <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24">
+              <rect
+                x="3"
+                y="3"
+                width="18"
+                height="18"
+                rx="3"
+                className="stroke-gray-400"
+                strokeWidth="1.5"
+              />
+              <circle cx="8.5" cy="8.5" r="1.5" className="fill-gray-400" />
+              <path
+                d="M3 15l5-5 4 4 3-3 6 6"
+                className="stroke-gray-400"
+                strokeWidth="1.5"
+                strokeLinejoin="round"
+              />
             </svg>
           </div>
         )}
       </div>
 
-      {/* Info & Button */}
-      <p
-        style={{
-          fontFamily: "'Geist Variable', 'Inter', sans-serif",
-          fontSize: "16px",
-          fontWeight: 500,
-          color: "#1E1F24",
-          margin: 0,
-          marginBottom: "4px",
-          lineHeight: 1.4,
-        }}
-      >
+      {/* Judul Barang */}
+      <p className="text-base font-medium text-gray-900 mb-1 leading-snug">
         {item.nama}
       </p>
-      <p
-  style={{
-    fontFamily: "'Geist Variable', 'Inter', sans-serif",
-    fontSize: "14px",
-    fontWeight: 400,
-    color: "#5E5E5E",
-    margin: 0,
-    marginBottom: "16px",
-    lineHeight: 1.4,
-    display: "-webkit-box",
-    WebkitLineClamp: 1,
-    WebkitBoxOrient: "vertical",
-    overflow: "hidden",
-    textOverflow: "ellipsis",
-  }}
->
-  {item.deskripsi}
-</p>
 
+      {/* Deskripsi Barang */}
+      <p className="text-sm font-normal text-gray-500 mb-4 leading-snug line-clamp-1">
+        {item.deskripsi}
+      </p>
+
+      {/* Tombol Aksi */}
       <button
         onClick={handleBeli}
-        style={{
-          width: "100%",
-          padding: "11px 0",
-          background: "#3A72D2",
-          color: "#ffffff",
-          border: "none",
-          borderRadius: "8px",
-          fontFamily: "'Geist Variable', 'Inter', sans-serif",
-          fontSize: "13px",
-          fontWeight: 600,
-          cursor: "pointer",
-          transition: "background 0.15s ease",
-        }}
-        onMouseEnter={(e) => (e.currentTarget.style.background = "#3569C1")}
-        onMouseLeave={(e) => (e.currentTarget.style.background = "#3A72D2")}
+        className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white border-none rounded-lg text-xs font-semibold cursor-pointer transition-colors duration-150 ease-in-out mt-auto"
       >
         Beli Sekarang
       </button>

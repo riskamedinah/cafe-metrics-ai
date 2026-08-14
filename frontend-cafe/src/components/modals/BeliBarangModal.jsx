@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Minus, Plus } from "lucide-react";
-import BaseModal from "../ui/BaseModal";
+import BaseModal from "./BaseModal";
 import { useToast } from "../ui/Notification";
 import api from "../../lib/axios";
 
@@ -27,7 +27,6 @@ const BeliBarangModal = ({ isOpen, onClose, item, onSuccess }) => {
   const handleSubmit = async () => {
     setSubmitting(true);
     try {
-      // Sesuaikan field ini dengan kontrak backend /api/penjualan kamu
       const res = await api.post("/penjualan", {
         barang_id: item.id,
         namaProduk: item.nama,
@@ -43,149 +42,84 @@ const BeliBarangModal = ({ isOpen, onClose, item, onSuccess }) => {
         toast.error("Gagal mencatat penjualan", res.data.message);
       }
     } catch (err) {
-      toast.error("Gagal mencatat penjualan", err.response?.data?.message || "Terjadi kesalahan pada server");
+      toast.error(
+        "Gagal mencatat penjualan",
+        err.response?.data?.message || "Terjadi kesalahan pada server"
+      );
     } finally {
       setSubmitting(false);
     }
   };
 
   return (
-    <BaseModal isOpen={isOpen} onClose={handleClose} title="Beli Produk" maxWidth="420px">
-      <div style={{ padding: "20px 24px 4px" }}>
-        <div style={{ display: "flex", gap: 14, alignItems: "flex-start" }}>
+    <BaseModal isOpen={isOpen} onClose={handleClose} title="Beli Produk" maxWidth="max-w-sm">
+      <div className="px-6 pt-5 pb-1">
+        {/* Item Detail */}
+        <div className="flex items-start gap-3.5">
           <img
             src={item.gambar}
             alt={item.nama}
-            style={{
-              width: 68,
-              height: 68,
-              borderRadius: 10,
-              objectFit: "cover",
-              border: "1px solid #EAECF0",
-              flexShrink: 0,
-              background: "#F4F5F7",
-            }}
+            className="h-17 w-17 shrink-0 rounded-lg border border-neutral-100 bg-neutral-50 object-cover"
           />
-          <div style={{ minWidth: 0 }}>
-            <div style={{ fontSize: 14, fontWeight: 600, color: "#1E1F24", lineHeight: 1.3 }}>
+          <div className="min-w-0">
+            <div className="text-sm font-semibold leading-tight text-neutral-900">
               {item.nama}
             </div>
-            {item.kategori ? <div style={{ marginTop: 6, fontSize: 13, color: "#6B7280" }}>{item.kategori}</div> : null}
-            <div style={{ marginTop: 6, fontSize: 14, fontWeight: 600, color: "var(--color-primary)" }}>
+            {item.kategori && (
+              <div className="mt-1.5 text-xs text-neutral-400">{item.kategori}</div>
+            )}
+            <div className="mt-1.5 text-sm font-semibold text-primary">
               {formatRupiah(item.harga)}
             </div>
           </div>
         </div>
 
-        <div
-          style={{
-            marginTop: 20,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-          }}
-        >
-          <span style={{ fontSize: 13, fontWeight: 500, color: "#374151" }}>Jumlah</span>
+        {/* Counter Quantity */}
+        <div className="mt-5 flex items-center justify-between">
+          <span className="text-xs font-medium text-neutral-800">Jumlah</span>
 
-          <div style={{ display: "flex", alignItems: "center", gap: 0, border: "1px solid #DDE1E7", borderRadius: 8 }}>
+          <div className="flex items-center rounded-lg border border-neutral-200">
             <button
               onClick={() => ubahJumlah(-1)}
               disabled={jumlah <= 1}
-              style={{
-                width: 32,
-                height: 32,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                background: "none",
-                border: "none",
-                borderRight: "1px solid #DDE1E7",
-                cursor: jumlah <= 1 ? "not-allowed" : "pointer",
-                color: jumlah <= 1 ? "#CACCD7" : "#374151",
-              }}
+              className="flex h-8 w-8 items-center justify-center border-r border-neutral-200 text-neutral-800 disabled:cursor-not-allowed disabled:text-neutral-300"
             >
               <Minus size={14} />
             </button>
-            <span style={{ width: 40, textAlign: "center", fontSize: 13, fontWeight: 600, color: "#1E1F24" }}>
+            <span className="w-10 text-center text-xs font-semibold text-neutral-900">
               {jumlah}
             </span>
             <button
               onClick={() => ubahJumlah(1)}
-              style={{
-                width: 32,
-                height: 32,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                background: "none",
-                border: "none",
-                borderLeft: "1px solid #DDE1E7",
-                cursor: "pointer",
-                color: "#374151",
-              }}
+              className="flex h-8 w-8 items-center justify-center border-l border-neutral-200 text-neutral-800 hover:bg-neutral-50"
             >
               <Plus size={14} />
             </button>
           </div>
         </div>
 
-        <div
-          style={{
-            marginTop: 16,
-            padding: "12px 14px",
-            background: "#F4F5F7",
-            borderRadius: 8,
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-        >
-          <span style={{ fontSize: 13, color: "#5F637B" }}>Total</span>
-          <span style={{ fontSize: 15, fontWeight: 700, color: "#1E1F24" }}>{formatRupiah(total)}</span>
+        {/* Total Price Box */}
+        <div className="mt-4 flex items-center justify-between rounded-lg bg-neutral-50 p-3 px-3.5">
+          <span className="text-xs text-neutral-400">Total</span>
+          <span className="text-sm font-bold text-neutral-900">{formatRupiah(total)}</span>
         </div>
       </div>
 
-      <div style={{ height: "1px", background: "#F0F1F3", marginTop: 20 }} />
+      <div className="mt-5 h-px bg-neutral-100" />
 
-      <div style={{ padding: "16px 24px", display: "flex", justifyContent: "flex-end", gap: 10 }}>
+      {/* Footer Actions */}
+      <div className="flex justify-end gap-2.5 p-4 px-6">
         <button
           onClick={handleClose}
           disabled={submitting}
-          style={{
-            padding: "9px 20px",
-            border: "1px solid #DDE1E7",
-            borderRadius: 8,
-            background: "#fff",
-            fontSize: 13,
-            fontWeight: 500,
-            color: "#374151",
-            cursor: "pointer",
-            fontFamily: "inherit",
-          }}
+          className="cursor-pointer rounded-lg border border-neutral-200 bg-white px-5 py-2 text-xs font-medium text-neutral-800 hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-60"
         >
           Batal
         </button>
         <button
           onClick={handleSubmit}
           disabled={submitting}
-          style={{
-            padding: "9px 20px",
-            border: "none",
-            borderRadius: 8,
-            background: "var(--color-primary)",
-            fontSize: 13,
-            fontWeight: 600,
-            color: "#fff",
-            cursor: submitting ? "not-allowed" : "pointer",
-            opacity: submitting ? 0.7 : 1,
-            fontFamily: "inherit",
-          }}
-          onMouseEnter={(e) => {
-            if (!submitting) e.currentTarget.style.background = "var(--color-primary-hover)";
-          }}
-          onMouseLeave={(e) => {
-            if (!submitting) e.currentTarget.style.background = "var(--color-primary)";
-          }}
+          className="cursor-pointer rounded-lg bg-primary px-5 py-2 text-xs font-semibold text-white hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-70 transition-colors"
         >
           {submitting ? "Memproses..." : "Konfirmasi Pembelian"}
         </button>

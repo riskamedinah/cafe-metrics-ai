@@ -4,11 +4,10 @@ import {
   LayoutDashboard, Package, SlidersHorizontal, BarChart2,
   Sparkles, ChevronDown, Menu, X, LogOut,
 } from 'lucide-react'
-import { useAuth } from '../context/AuthContext'
-import api from '../lib/axios'
-import LogoutModal from '../components/modals/LogoutModal'
+import { useAuth } from '../../context/AuthContext'
+import api from '../../lib/axios'
+import ConfirmModal from '../modals/ConfirmModal'
 
-// ─── Page titles ──────────────────────────────────────────────────
 const pageTitles = {
   '/dashboard': 'Dashboard',
   '/barang': 'Barang',
@@ -19,7 +18,6 @@ const pageTitles = {
   '/generate': 'Generate Ringkasan',
 }
 
-// ─── Nav item styles ───────────────────────────────────────────────
 const navBase = 'flex items-center gap-3 px-4 py-3 rounded-lg text-base font-medium transition-colors duration-150 cursor-pointer w-full text-left'
 const navActive = 'bg-[#3A72D4] text-white'
 const navInactive = 'text-black hover:bg-gray-100'
@@ -28,13 +26,11 @@ const subNavBase = 'flex items-center gap-2.5 px-4 py-2.5 rounded-lg text-base f
 const subNavActive = 'bg-[#3A72D4] text-white font-medium'
 const subNavInactive = 'text-black hover:bg-gray-100'
 
-// ─── Sidebar content ──────────────────────────────────────────────
 const SidebarContent = ({ onClose }) => {
   const [managementOpen, setManagementOpen] = useState(false)
 
   return (
     <div className="flex flex-col h-full">
-      {/* Logo */}
       <div className="flex items-center justify-between px-4 pt-6 pb-8">
         <div className="flex items-center gap-2.5">
           <img
@@ -51,7 +47,6 @@ const SidebarContent = ({ onClose }) => {
         )}
       </div>
 
-      {/* Nav */}
       <nav className="flex-1 px-3 space-y-1 overflow-y-auto">
         <p className="text-sm text-gray-600 font-medium px-1 mb-3">General</p>
 
@@ -73,7 +68,6 @@ const SidebarContent = ({ onClose }) => {
           Barang
         </NavLink>
 
-        {/* Management accordion */}
         <div>
           <button
             onClick={() => setManagementOpen(!managementOpen)}
@@ -138,13 +132,12 @@ const SidebarContent = ({ onClose }) => {
   )
 }
 
-// ─── Topbar ───────────────────────────────────────────────────────
 const Topbar = ({ onMenuClick }) => {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
   const [dropdownOpen, setDropdownOpen] = useState(false)
-  const [showLogoutModal, setShowLogoutModal] = useState(false) // ← tambahan
+  const [showLogoutModal, setShowLogoutModal] = useState(false)
   const timeoutRef = useRef(null)
 
   const pageTitle = pageTitles[location.pathname] ?? 'Dashboard'
@@ -158,8 +151,8 @@ const Topbar = ({ onMenuClick }) => {
     timeoutRef.current = setTimeout(() => setDropdownOpen(false), 150)
   }
 
-  // Sekarang dipanggil saat user klik "Logout" di modal
   const handleLogoutConfirm = async () => {
+    setShowLogoutModal(false)
     try {
       await api.post('/logout')
     } catch (_) {}
@@ -169,8 +162,7 @@ const Topbar = ({ onMenuClick }) => {
 
   return (
     <>
-      <header className="flex items-center justify-between px-6 py-3 bg-white border-b border-gray-100 flex-shrink-none">
-        {/* Left — hamburger + page title */}
+      <header className="flex items-center justify-between px-6 py-3 bg-white border-b border-gray-100 shrink-0">
         <div className="flex items-center gap-3">
           <button
             onClick={onMenuClick}
@@ -181,18 +173,15 @@ const Topbar = ({ onMenuClick }) => {
           <h1 className="text-xl font-medium text-black">{pageTitle}</h1>
         </div>
 
-        {/* Right — profile */}
         <div
           className="relative flex items-center gap-3 cursor-pointer select-none"
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}
         >
-          {/* Avatar */}
-          <div className="w-9 h-9 rounded-full bg-[#3A72D4] flex items-center justify-center text-white text-sm font-semibold flex-shrink-none">
+          <div className="w-9 h-9 rounded-full bg-[#3A72D4] flex items-center justify-center text-white text-sm font-semibold shrink-0">
             {user?.name?.charAt(0).toUpperCase() ?? 'U'}
           </div>
 
-          {/* Name & email */}
           <div className="hidden sm:block">
             <p className="text-base font-semibold text-gray-800 leading-tight">
               {user?.name ?? 'User'}
@@ -202,60 +191,50 @@ const Topbar = ({ onMenuClick }) => {
             </p>
           </div>
 
-          {/* Chevron */}
           <ChevronDown
             size={16}
             className={`text-gray-400 transition-transform duration-200 ${dropdownOpen ? 'rotate-180' : ''}`}
           />
 
-          {/* Dropdown */}
-        {dropdownOpen && (
-  <div className="absolute right-0 top-full mt-2 w-40 bg-white rounded-xl shadow-lg border border-gray-100 py-2 px-2 z-50">
-    <button
-      onClick={() => {
-        setDropdownOpen(false);
-        setShowLogoutModal(true);
-      }}
-      className="flex items-center gap-2.5 w-full px-3 py-2.5 text-sm text-white font-medium transition-colors rounded-lg mx-1"
-    style={{
-  background: "#EF4444",
-  width: "calc(100% - 8px)",
-  color: "#fff",
-}}
-onMouseEnter={(e) => (e.currentTarget.style.background = "#DC2626")}
-onMouseLeave={(e) => (e.currentTarget.style.background = "#EF4444")}
-    >
-      <LogOut size={16} />
-      Logout
-    </button>
-  </div>
-)}
+          {dropdownOpen && (
+            <div className="absolute right-0 top-full mt-2 w-40 bg-white rounded-xl shadow-lg border border-gray-100 p-1 z-50">
+              <button
+                onClick={() => {
+                  setDropdownOpen(false);
+                  setShowLogoutModal(true);
+                }}
+                className="flex items-center gap-2.5 w-full px-3 py-2 text-sm text-white font-medium bg-red-500 hover:bg-red-600 transition-colors rounded-lg"
+              >
+                <LogOut size={16} />
+                Logout
+              </button>
+            </div>
+          )}
         </div>
       </header>
 
-      {/* Logout Modal */}
-      <LogoutModal
+      <ConfirmModal
         isOpen={showLogoutModal}
         onClose={() => setShowLogoutModal(false)}
         onConfirm={handleLogoutConfirm}
+        title="Logout"
+        message="Apakah kamu yakin akan logout dari sistem?"
+        confirmText="Logout"
+        confirmVariant="danger"
       />
     </>
   )
 }
 
-// ─── Main Layout ───────────────────────────────────────────────────
 const MainLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   return (
     <div className="flex h-screen bg-gray-100 overflow-hidden">
-
-      {/* Sidebar Desktop */}
       <aside className="hidden lg:flex flex-col w-64 bg-white border-r border-gray-100 flex-none">
         <SidebarContent />
       </aside>
 
-      {/* Sidebar Mobile — overlay */}
       {sidebarOpen && (
         <div className="fixed inset-0 z-40 lg:hidden">
           <div
@@ -268,13 +247,9 @@ const MainLayout = () => {
         </div>
       )}
 
-      {/* Main content */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-
-        {/* Topbar */}
         <Topbar onMenuClick={() => setSidebarOpen(true)} />
 
-        {/* Page content */}
         <main className="flex-1 overflow-y-auto p-6">
           <Outlet />
         </main>

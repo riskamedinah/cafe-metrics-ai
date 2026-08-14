@@ -23,7 +23,6 @@ const SelectField = ({
         onChange={onChange}
         required={required}
         className={`w-full px-3.5 py-2.5 border rounded-lg text-[13px] bg-white focus:outline-none focus:border-[#3A72D4] transition ${
-          // 🔹 Logika warna placeholder vs opsi terpilih
           !value ? "text-[#9CA3AF]" : "text-[#374151]"
         } ${error ? "border-red-400" : "border-[#DDE1E7]"}`}
       >

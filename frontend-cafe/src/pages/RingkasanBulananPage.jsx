@@ -3,7 +3,7 @@ import { Eye } from "lucide-react";
 import BaseSearch from "../components/ui/BaseSearch";
 import BaseTable from "../components/ui/BaseTable";
 import EmptyState from "../components/ui/EmptyState";
-import Pagination from "../components/ui/Pagination"; // 👈 Impor Pagination
+import Pagination from "../components/ui/Pagination";
 import RingkasanBulananModal from "../components/modals/RingkasanBulananModal";
 import { useData } from "../context/DataContext";
 import LoadingState from "../components/ui/LoadingState";
@@ -14,7 +14,6 @@ const bulanIni = () => {
 };
 
 export default function RingkasanBulananPage() {
-  // 👈 Ambil ringkasanMeta
   const { ringkasan, ringkasanMeta, fetchRingkasan, loadingRingkasan } = useData(); 
   const [search, setSearch] = useState("");
   const [selectedItem, setSelectedItem] = useState(null);
@@ -86,7 +85,6 @@ export default function RingkasanBulananPage() {
           <>
             <BaseTable columns={columns} data={filteredData} actionRow={actionRow} emptyMessage="Tidak ada data ringkasan." />
             
-            {/* 👈 Pasang Komponen Pagination */}
             {!search && (
               <div className="mt-4 flex justify-end">
                 <Pagination

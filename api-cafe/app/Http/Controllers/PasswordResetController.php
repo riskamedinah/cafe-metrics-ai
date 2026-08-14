@@ -31,7 +31,6 @@ class PasswordResetController extends Controller
             ], 422);
         }
 
-        // Kirim reset link menggunakan Password broker default
         $status = Password::sendResetLink(
             $request->only('email')
         );
@@ -39,13 +38,13 @@ class PasswordResetController extends Controller
         if ($status === Password::RESET_LINK_SENT) {
             return response()->json([
                 'status' => true,
-                'message' => __($status) // "Kami telah mengirimkan link reset password ke email Anda."
+                'message' => __($status)
             ], 200);
         }
 
         return response()->json([
             'status' => false,
-            'message' => __($status) // "Email tidak ditemukan" atau lainnya
+            'message' => __($status)
         ], 400);
     }
 
@@ -68,29 +67,25 @@ class PasswordResetController extends Controller
             ], 422);
         }
 
-        // Reset password
         $status = Password::reset(
             $request->only('email', 'password', 'password_confirmation', 'token'),
             function (User $user, string $password) {
                 $user->forceFill([
                     'password' => Hash::make($password)
                 ])->save();
-
-                // Optional: hapus semua token sanctum user agar logout otomatis di semua perangkat
-                // $user->tokens()->delete();
             }
         );
 
         if ($status === Password::PASSWORD_RESET) {
             return response()->json([
                 'status' => true,
-                'message' => __($status) // "Password berhasil direset."
+                'message' => __($status)
             ], 200);
         }
 
         return response()->json([
             'status' => false,
-            'message' => __($status) // "Token tidak valid" atau lainnya
+            'message' => __($status)
         ], 400);
     }
 }

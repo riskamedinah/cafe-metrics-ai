@@ -16,7 +16,7 @@ import { DataProvider } from './context/DataContext';
 import ForgotPasswordPage from './pages/ForgotPasswordPage'
 import ResetPasswordPage from './pages/ResetPasswordPage'
 
-import MainLayout from './layouts/MainLayout';
+import MainLayout from './components/layouts/MainLayout';
 
 function App() {
     return (

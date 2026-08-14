@@ -64,7 +64,6 @@ const RegisterPage = () => {
   return (
     <AuthLayout>
       <div ref={formRef} className="w-full max-w-lg">
-        {/* Header */}
         <div className="text-center mb-6">
           <h2 className="text-2xl font-medium text-gray-900">Register</h2>
           <p className="text-gray-500 text-md mt-1">
@@ -114,7 +113,7 @@ const RegisterPage = () => {
             disabled={loading}
             className="w-full bg-[#3A72D4] hover:bg-[#3451c7] text-white py-2.5 rounded-lg font-medium text-sm transition disabled:opacity-60 disabled:cursor-not-allowed"
           >
-            {loading ? 'Memproses...' : 'Register'}
+            Register
           </button>
         </form>
 

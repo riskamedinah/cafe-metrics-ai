@@ -5,22 +5,19 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
     /**
      * FITUR: Registrasi Akun Owner Baru
      * ENDPOINT: POST /api/register
-     * AKSES: Publik
      */
-   public function register(Request $request): JsonResponse
-   {
+    public function register(Request $request): JsonResponse
+    {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users',
+            'email' => 'required|email|unique:users,email',
             'password' => 'required|string|min:8',
         ]);
 
@@ -37,25 +34,26 @@ class AuthController extends Controller
             'message' => 'Registrasi berhasil',
             'data' => [
                 'user' => $user,
-                'token' => $token,
+                'access_token' => $token,
                 'token_type' => 'Bearer',
             ],
         ], 201);
-   }
+    }
 
-   /**
-     * FITUR: Login Autentikasi User
+    /**
+     * FITUR: Login Autentikasi User (Fast API Mode)
      * ENDPOINT: POST /api/login
-     * AKSES: Publik
      */
     public function login(Request $request): JsonResponse
     {
-        $request->validate([
+        $validated = $request->validate([
             'email' => 'required|email',
             'password' => 'required',
         ]);
 
-        if (!Auth::attempt($request->only('email', 'password'))){
+        $user = User::where('email', $validated['email'])->first();
+
+        if (!$user || !Hash::check($validated['password'], $user->password)) {
             return response()->json([
                 'status' => false,
                 'message' => 'Email atau password salah',
@@ -63,7 +61,8 @@ class AuthController extends Controller
             ], 401);
         }
 
-        $user = Auth::user();
+        $user->tokens()->delete();
+
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
@@ -78,19 +77,17 @@ class AuthController extends Controller
     }
 
     /**
-     * FITUR: Logout Akun (Hapus Token Aktif)
+     * FITUR: Logout Akun
      * ENDPOINT: POST /api/logout
-     * AKSES: Terproteksi Token (Bearer Token)
      */
-     public function logout(Request $request): JsonResponse 
-        {
-            $request->user()->currentAccessToken()->delete();
+    public function logout(Request $request): JsonResponse 
+    {
+        $request->user()->currentAccessToken()->delete();
 
-            return response()->json([
-                'status' => true,
-                'message' => 'Logout berhasil',
-                'data' => null,
-            ]);
-        }
-
+        return response()->json([
+            'status' => true,
+            'message' => 'Logout berhasil',
+            'data' => null,
+        ]);
+    }
 }

@@ -1,15 +1,12 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from "recharts";
-import { Package, TrendingDown, ShoppingCart, Wallet } from "lucide-react";
-import TabelPenjualan from "../components/ui/TabelPenjualan";
-// UBAH: tidak perlu import api, pakai useData
+import { Package, TrendingDown, ShoppingCart, Wallet, SquarePen, Trash2 } from "lucide-react";
+import BaseTable from "../components/ui/BaseTable";
 import { useData } from "../context/DataContext";
 import { useNavigate } from 'react-router-dom';
 import LoadingState from "../components/ui/LoadingState";
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
 
 const formatRupiah = (value) =>
   new Intl.NumberFormat("id-ID", {
@@ -17,19 +14,17 @@ const formatRupiah = (value) =>
     currency: "IDR",
     minimumFractionDigits: 0,
   })
-    .format(value)
+    .format(value || 0)
     .replace("IDR", "Rp")
     .trim();
-
-// ─── Custom Tooltip ───────────────────────────────────────────────────────────
 
 const CustomTooltip = ({ active, payload, label }) => {
   if (!active || !payload || !payload.length) return null;
   return (
-    <div className="tooltip-box">
-      <p className="tooltip-label">{label}</p>
+    <div className="rounded-xl bg-neutral-900 p-2.5 px-3.5 text-xs text-white shadow-xl">
+      <p className="mb-1 text-xs text-neutral-300">{label}</p>
       {payload.map((entry) => (
-        <p key={entry.dataKey} className="tooltip-value" style={{ color: entry.color }}>
+        <p key={entry.dataKey} className="my-0.5 font-medium" style={{ color: entry.color }}>
           {entry.dataKey === "totalHarga"
             ? formatRupiah(entry.value)
             : `${entry.value} penjualan`}
@@ -39,265 +34,148 @@ const CustomTooltip = ({ active, payload, label }) => {
   );
 };
 
-// ─── Stat Card ────────────────────────────────────────────────────────────────
-
 const StatCard = ({ label, value, icon: Icon }) => (
-  <div className="stat-card">
-    <div className="stat-icon-wrap">
-      <Icon size={18} strokeWidth={1.5} className="stat-icon" />
+  <div className="flex flex-col gap-1.5 rounded-xl border border-neutral-100 bg-white p-5 transition-shadow duration-150 hover:shadow-md">
+    <div className="mb-1 flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10">
+      <Icon size={18} strokeWidth={1.5} className="text-primary" />
     </div>
-    <p className="stat-label">{label}</p>
-    <p className="stat-value">{value}</p>
+    <p className="m-0 text-xs text-neutral-400">{label}</p>
+    <p className="m-0 text-xl font-semibold text-neutral-900 sm:text-2xl">{value}</p>
   </div>
 );
 
-// ─── Main Component ───────────────────────────────────────────────────────────
-
 const DashboardPage = () => {
-   const navigate = useNavigate();
+  const navigate = useNavigate();
   const { dashboard, fetchDashboard, loadingDashboard } = useData();
 
   useEffect(() => {
-    fetchDashboard();
-  }, []);
+    if (!dashboard) {
+      fetchDashboard();
+    }
+  }, [dashboard, fetchDashboard]);
 
-if (loadingDashboard || !dashboard) {
-  return (
-    <div className="dashboard-root" style={{ padding: "28px 32px", background: "#F4F5F7", minHeight: "100vh" }}>
-      <LoadingState text="Memuat dashboard..." />
-    </div>
-  );
-}
+  if (loadingDashboard && !dashboard) {
+    return (
+      <div className="min-h-screen bg-neutral-50 p-7">
+        <LoadingState text="Memuat dashboard..." />
+      </div>
+    );
+  }
+
+  if (!dashboard) return null;
 
   const { stats, chart, table } = dashboard;
 
   const statCards = [
-    { id: 1, label: "Total Produk", value: stats.totalProduk.toString(), icon: Package },
-    { id: 2, label: "Kategori", value: stats.totalKategori.toString(), icon: TrendingDown },
-    { id: 3, label: "Total Penjualan", value: stats.totalPenjualan.toString(), icon: ShoppingCart },
-    { id: 4, label: "Pendapatan", value: formatRupiah(stats.totalPendapatan), icon: Wallet },
+    { id: 1, label: "Total Produk", value: (stats?.totalProduk ?? 0).toString(), icon: Package },
+    { id: 2, label: "Kategori", value: (stats?.totalKategori ?? 0).toString(), icon: TrendingDown },
+    { id: 3, label: "Total Penjualan", value: (stats?.totalPenjualan ?? 0).toString(), icon: ShoppingCart },
+    { id: 4, label: "Pendapatan", value: formatRupiah(stats?.totalPendapatan), icon: Wallet },
   ];
 
   return (
-    <>
-      <style>{`
-        /* ── Layout ── */
-        .dashboard-root {
-          display: flex;
-          flex-direction: column;
-          gap: 24px;
-          padding: 28px 32px;
-          min-height: 100vh;
-          background: #F4F5F7;
-          font-family: 'Geist Variable', 'Geist', ui-sans-serif, system-ui, sans-serif;
-          color: #373742;
-        }
+    <div className="flex min-h-screen flex-col gap-6 bg-neutral-50 p-4 font-sans text-neutral-900 sm:p-7">
+      {/* Stat Cards Grid */}
+      <div className="grid grid-cols-2 gap-2.5 sm:gap-4 md:grid-cols-4">
+        {statCards.map((card) => (
+          <StatCard key={card.id} {...card} />
+        ))}
+      </div>
 
-        /* ── Stat Cards ── */
-        .stat-grid {
-          display: grid;
-          grid-template-columns: repeat(4, 1fr);
-          gap: 16px;
-        }
+      {/* Panel Grafik */}
+      <div className="rounded-xl border border-neutral-100 bg-white p-6">
+        <p className="m-0 text-base font-semibold text-neutral-900">Grafik Penjualan Dan Total Harga</p>
+        <p className="mb-5 text-xs text-neutral-300">
+          {new Date().toLocaleDateString("id-ID", { month: "long", year: "numeric" })}
+        </p>
 
-        .stat-card {
-          background: #ffffff;
-          border-radius: 14px;
-          padding: 20px;
-          border: 1px solid #E8E9EE;
-          display: flex;
-          flex-direction: column;
-          gap: 6px;
-          transition: box-shadow 0.15s ease;
-        }
-
-        .stat-card:hover {
-          box-shadow: 0 4px 16px rgba(59, 91, 219, 0.08);
-        }
-
-        .stat-icon-wrap {
-          width: 36px;
-          height: 36px;
-          border-radius: 10px;
-          background: #EEF2FF;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          margin-bottom: 4px;
-        }
-
-        .stat-icon {
-          color: #3A72D4;
-        }
-
-        .stat-label {
-          font-size: 13px;
-          color: #7B7C8D;
-          font-weight: 400;
-          margin: 0;
-        }
-
-        .stat-value {
-          font-size: 22px;
-          font-weight: 600;
-          color: #373742;
-          margin: 0;
-        }
-
-        /* ── Panel ── */
-        .panel {
-          background: #ffffff;
-          border-radius: 14px;
-          border: 1px solid #E8E9EE;
-          padding: 24px;
-        }
-
-        .panel-title {
-          font-size: 16px;
-          font-weight: 600;
-          color: #373742;
-          margin: 0 0 2px;
-        }
-
-        .panel-subtitle {
-          font-size: 13px;
-          color: #9A9BAA;
-          margin: 0 0 20px;
-        }
-
-        /* ── Chart ── */
-        .chart-wrap {
-          height: 240px;
-        }
-
-        /* ── Legend ── */
-        .chart-legend {
-          display: flex;
-          gap: 20px;
-          margin-bottom: 16px;
-        }
-
-        .legend-item {
-          display: flex;
-          align-items: center;
-          gap: 6px;
-          font-size: 13px;
-          color: #7B7C8D;
-        }
-
-        .legend-dot {
-          width: 8px;
-          height: 8px;
-          border-radius: 50%;
-        }
-
-        /* ── Tooltip ── */
-        .tooltip-box {
-          background: #373742;
-          border-radius: 10px;
-          padding: 10px 14px;
-          font-size: 13px;
-          box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-        }
-
-        .tooltip-label {
-          color: #9A9BAA;
-          font-size: 12px;
-          margin: 0 0 4px;
-        }
-
-        .tooltip-value {
-          margin: 2px 0;
-          font-weight: 500;
-        }
-
-        /* ── Responsive ── */
-        @media (max-width: 900px) {
-          .stat-grid {
-            grid-template-columns: repeat(2, 1fr);
-          }
-        }
-
-        @media (max-width: 560px) {
-          .dashboard-root {
-            padding: 16px;
-          }
-          .stat-grid {
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-          }
-          .stat-value {
-            font-size: 18px;
-          }
-        }
-      `}</style>
-
- <div className="dashboard-root">
-        <div className="stat-grid">
-          {statCards.map((card) => (
-            <StatCard key={card.id} {...card} />
-          ))}
+        <div className="mb-4 flex gap-5">
+          <span className="flex items-center gap-1.5 text-xs text-neutral-400">
+            <span className="h-2 w-2 rounded-full bg-primary" />
+            Total Penjualan
+          </span>
+          <span className="flex items-center gap-1.5 text-xs text-neutral-400">
+            <span className="h-2 w-2 rounded-full bg-neutral-300" />
+            Total Harga
+          </span>
         </div>
 
-        <div className="panel">
-          <p className="panel-title">Grafik Penjualan Dan Total Harga</p>
-          <p className="panel-subtitle">
-            {new Date().toLocaleDateString("id-ID", { month: "long", year: "numeric" })}
-          </p>
-          <div className="chart-legend">
-            <span className="legend-item">
-              <span className="legend-dot" style={{ background: "#3A72D4" }} />
-              Total Penjualan
-            </span>
-            <span className="legend-item">
-              <span className="legend-dot" style={{ background: "#94A3B8" }} />
-              Total Harga
-            </span>
+        {/* Chart Container dengan h-60 (240px) */}
+        <div className="flex h-60 w-full items-center gap-2">
+          <div className="shrink-0 rotate-180 text-xs text-neutral-300 [writing-mode:vertical-rl]">
+            Total Penjualan
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <div style={{ writingMode: "vertical-rl", transform: "rotate(180deg)", fontSize: 11, color: "#9A9BAA", whiteSpace: "nowrap", flexShrink: 0 }}>
-              Total Penjualan
-            </div>
-            <div className="chart-wrap" style={{ flex: 1 }}>
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={chart} margin={{ top: 8, right: 24, left: 0, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#F1F2F6" vertical={false} />
-                  <XAxis dataKey="minggu" tick={{ fontSize: 12, fill: "#9A9BAA" }} axisLine={false} tickLine={false} />
-                  <YAxis yAxisId="left" tick={{ fontSize: 12, fill: "#9A9BAA" }} axisLine={false} tickLine={false} width={28} domain={[0, 5]} ticks={[0, 1, 2, 3, 4, 5]} />
-                  <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 12, fill: "#9A9BAA" }} axisLine={false} tickLine={false} width={48} domain={[0, 400000]} ticks={[0, 100000, 200000, 300000, 400000]} tickFormatter={(v) => {
-                    if (v >= 1000000) return `${(v / 1000000).toFixed(0)}jt`;
-                    if (v >= 1000) return `${(v / 1000).toFixed(0)}rb`;
-                    return v.toString();
-                  }} />
-                  <Tooltip content={<CustomTooltip />} />
-                  <Line yAxisId="left" type="linear" dataKey="totalPenjualan" stroke="#3A72D4" strokeWidth={2} dot={{ r: 4, fill: "white", stroke: "#3A72D4", strokeWidth: 2 }} activeDot={{ r: 6, fill: "white", stroke: "#3451C7", strokeWidth: 2.5 }} isAnimationActive={false} />
-                  <Line yAxisId="right" type="linear" dataKey="totalHarga" stroke="#94A3B8" strokeWidth={2} strokeDasharray="6 4" dot={{ r: 4, fill: "white", stroke: "#94A3B8", strokeWidth: 2 }} activeDot={{ r: 6, fill: "white", stroke: "#64748B", strokeWidth: 2.5 }} isAnimationActive={false} />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-            <div style={{ writingMode: "vertical-rl", fontSize: 11, color: "#9A9BAA", whiteSpace: "nowrap", flexShrink: 0 }}>
-              Total Harga
-            </div>
+          <div className="h-full min-w-0 flex-1">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={chart} margin={{ top: 8, right: 24, left: 0, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#E3E4EA" vertical={false} />
+                <XAxis dataKey="minggu" tick={{ fontSize: 12, fill: "#A6AABA" }} axisLine={false} tickLine={false} />
+                <YAxis yAxisId="left" tick={{ fontSize: 12, fill: "#A6AABA" }} axisLine={false} tickLine={false} width={28} domain={[0, 5]} ticks={[0, 1, 2, 3, 4, 5]} />
+                <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 12, fill: "#A6AABA" }} axisLine={false} tickLine={false} width={48} domain={[0, 400000]} ticks={[0, 100000, 200000, 300000, 400000]} tickFormatter={(v) => {
+                  if (v >= 1000000) return `${(v / 1000000).toFixed(0)}jt`;
+                  if (v >= 1000) return `${(v / 1000).toFixed(0)}rb`;
+                  return v.toString();
+                }} />
+                <Tooltip content={<CustomTooltip />} />
+                <Line yAxisId="left" type="linear" dataKey="totalPenjualan" stroke="#3A72D2" strokeWidth={2} dot={{ r: 4, fill: "white", stroke: "#3A72D2", strokeWidth: 2 }} activeDot={{ r: 6, fill: "white", stroke: "#3569C1", strokeWidth: 2.5 }} isAnimationActive={false} />
+                <Line yAxisId="right" type="linear" dataKey="totalHarga" stroke="#A6AABA" strokeWidth={2} strokeDasharray="6 4" dot={{ r: 4, fill: "white", stroke: "#A6AABA", strokeWidth: 2 }} activeDot={{ r: 6, fill: "white", stroke: "#7A7F96", strokeWidth: 2.5 }} isAnimationActive={false} />
+              </LineChart>
+            </ResponsiveContainer>
           </div>
-        </div>
-
-        <div className="panel">
-        <TabelPenjualan
-    data={table}
-    onEditBarang={(item) => {
-      navigate('/barang-management', {
-        state: { openEditModal: true, barangId: item.barangId }
-      });
-    }}
-    onHapusBarang={(item) => {
-      navigate('/barang-management', {
-        state: { openHapusModal: true, barangId: item.barangId }
-      });
-    }}
-  />  
+          <div className="shrink-0 text-xs text-neutral-300 [writing-mode:vertical-rl]">
+            Total Harga
+          </div>
         </div>
       </div>
-    </>
+
+      {/* Panel Tabel */}
+      <div className="rounded-xl border border-neutral-100 bg-white p-6">
+        <h2 className="text-base font-semibold text-neutral-900">Tabel Data Penjualan</h2>
+        <p className="mb-5 text-sm text-neutral-300">
+          {new Date().toLocaleDateString("id-ID", { month: "long", year: "numeric" })}
+        </p>
+
+        <BaseTable
+          columns={[
+            { header: "Nama Produk", key: "namaProduk" },
+            {
+              header: "Harga",
+              key: "harga",
+              render: (item) => `Rp ${(item.harga || 0).toLocaleString("id-ID")}`,
+            },
+            { header: "Jumlah", key: "jumlah" },
+            {
+              header: "Total",
+              key: "total",
+              render: (item) => `Rp ${(item.harga * item.jumlah || 0).toLocaleString("id-ID")}`,
+            },
+          ]}
+          data={table}
+          actionRow={(item) => (
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => navigate('/barang-management', {
+                  state: { openEditModal: true, barangId: item.barangId }
+                })}
+                title="Edit Barang"
+                className="cursor-pointer text-warning hover:opacity-80"
+              >
+                <SquarePen size={17} strokeWidth={1.8} />
+              </button>
+              <button
+                onClick={() => navigate('/barang-management', {
+                  state: { openHapusModal: true, barangId: item.barangId }
+                })}
+                title="Hapus Barang"
+                className="cursor-pointer text-danger hover:opacity-80"
+              >
+                <Trash2 size={17} strokeWidth={1.8} />
+              </button>
+            </div>
+          )}
+        />
+      </div>
+    </div>
   );
 };
 
