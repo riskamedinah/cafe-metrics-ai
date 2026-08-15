@@ -113,7 +113,6 @@ const GenerateRingkasanPage = () => {
 
   return (
     <div className="p-8 bg-neutral-50 min-h-screen font-sans">
-      {/* Header & Controls */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <h2 className="text-2xl font-medium text-[#1E1F24]">AI Generate Ringkasan</h2>
         <div className="flex flex-wrap items-center gap-3">
@@ -152,7 +151,6 @@ const GenerateRingkasanPage = () => {
 
       {error && <div className="text-red-500 mb-4">{error}</div>}
 
-      {/* Result Section */}
       {ringkasan && (
         <>
           <div className="flex flex-col gap-4">
@@ -193,7 +191,6 @@ const GenerateRingkasanPage = () => {
             </Card>
           </div>
 
-          {/* Action Buttons */}
           <div className="flex items-center gap-3 mt-6">
             <button
               onClick={handleSave}

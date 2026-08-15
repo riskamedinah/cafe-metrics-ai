@@ -75,14 +75,12 @@ const DashboardPage = () => {
 
   return (
     <div className="flex min-h-screen flex-col gap-6 bg-neutral-50 p-4 font-sans text-neutral-900 sm:p-7">
-      {/* Stat Cards Grid */}
       <div className="grid grid-cols-2 gap-2.5 sm:gap-4 md:grid-cols-4">
         {statCards.map((card) => (
           <StatCard key={card.id} {...card} />
         ))}
       </div>
 
-      {/* Panel Grafik */}
       <div className="rounded-xl border border-neutral-100 bg-white p-6">
         <p className="m-0 text-base font-semibold text-neutral-900">Grafik Penjualan Dan Total Harga</p>
         <p className="mb-5 text-xs text-neutral-300">
@@ -100,7 +98,6 @@ const DashboardPage = () => {
           </span>
         </div>
 
-        {/* Chart Container dengan h-60 (240px) */}
         <div className="flex h-60 w-full items-center gap-2">
           <div className="shrink-0 rotate-180 text-xs text-neutral-300 [writing-mode:vertical-rl]">
             Total Penjualan
@@ -128,7 +125,6 @@ const DashboardPage = () => {
         </div>
       </div>
 
-      {/* Panel Tabel */}
       <div className="rounded-xl border border-neutral-100 bg-white p-6">
         <h2 className="text-base font-semibold text-neutral-900">Tabel Data Penjualan</h2>
         <p className="mb-5 text-sm text-neutral-300">

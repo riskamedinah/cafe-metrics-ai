@@ -274,7 +274,6 @@ const TambahBarangModal = ({ isOpen, onClose, onSave, kategoriList = [] }) => {
           </div>
         </div>
 
-        {/* Drag & Drop File Upload */}
         <div className="mb-6">
           <label className="block text-xs font-semibold text-gray-900 mb-1.5">Foto Barang</label>
           <div

@@ -126,7 +126,6 @@ const EditBarangModal = ({ isOpen, onClose, onSave, data, kategoriList = [] }) =
     processFile(file);
   };
 
-  // Drag & Drop Handlers
   const handleDragOver = (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -194,7 +193,6 @@ const EditBarangModal = ({ isOpen, onClose, onSave, data, kategoriList = [] }) =
           />
         </div>
 
-        {/* Input Harga */}
         <div className="mb-4.5">
           <label className="mb-1.5 block text-xs font-semibold text-neutral-900">
             Harga Barang
@@ -208,7 +206,6 @@ const EditBarangModal = ({ isOpen, onClose, onSave, data, kategoriList = [] }) =
           />
         </div>
 
-        {/* Select Kategori */}
         <div className="mb-4.5">
           <SelectField
             label="Kategori Barang"
@@ -221,7 +218,6 @@ const EditBarangModal = ({ isOpen, onClose, onSave, data, kategoriList = [] }) =
           />
         </div>
 
-        {/* Input Stok */}
         <div className="mb-4.5">
           <label className="mb-1.5 block text-xs font-semibold text-neutral-900">
             Stok Barang
@@ -237,7 +233,6 @@ const EditBarangModal = ({ isOpen, onClose, onSave, data, kategoriList = [] }) =
           />
         </div>
 
-        {/* Textarea Deskripsi */}
         <div className="mb-4.5">
           <label className="mb-1.5 block text-xs font-semibold text-neutral-900">
             Deskripsi
@@ -257,7 +252,6 @@ const EditBarangModal = ({ isOpen, onClose, onSave, data, kategoriList = [] }) =
           </div>
         </div>
 
-        {/* Upload Foto dengan Drag & Drop */}
         <div className="mb-6">
           <label className="mb-1.5 block text-xs font-semibold text-neutral-900">
             Foto Barang

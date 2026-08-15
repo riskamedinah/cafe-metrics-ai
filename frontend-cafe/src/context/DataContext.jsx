@@ -30,6 +30,7 @@ export const DataProvider = ({ children }) => {
   const [loadingRingkasan, setLoadingRingkasan] = useState(false);
   const [loadingDashboard, setLoadingDashboard] = useState(false);
 
+  // Fetch Barang
   const fetchBarang = useCallback(async (force = false) => {
     if (!force && barangRef.current !== null) return;
     setLoadingBarang(true);
@@ -43,6 +44,7 @@ export const DataProvider = ({ children }) => {
     }
   }, []);
 
+  // Fetch Kategori
   const fetchKategori = useCallback(async (force = false) => {
     if (!force && kategoriRef.current !== null) return;
     setLoadingKategori(true);
@@ -56,6 +58,7 @@ export const DataProvider = ({ children }) => {
     }
   }, []);
 
+  // Fetch Penjualan
   const fetchPenjualan = useCallback(async (page = 1, force = false) => {
     if (!force && penjualanRef.current !== null && penjualanMeta.currentPage === page) return;
     setLoadingPenjualan(true);
@@ -84,6 +87,7 @@ export const DataProvider = ({ children }) => {
     }
   }, [penjualanMeta.currentPage]);
 
+  // Fetch Ringkasan
   const fetchRingkasan = useCallback(async (page = 1, force = false) => {
     if (!force && ringkasanRef.current !== null && ringkasanMeta.currentPage === page) return;
     setLoadingRingkasan(true);
@@ -116,6 +120,7 @@ export const DataProvider = ({ children }) => {
     }
   }, [ringkasanMeta.currentPage]);
 
+  // Fetch Dashboard
   const fetchDashboard = useCallback(async (force = false) => {
     if (!force && dashboardRef.current !== null) return;
     

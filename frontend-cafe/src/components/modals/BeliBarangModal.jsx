@@ -74,7 +74,6 @@ const BeliBarangModal = ({ isOpen, onClose, item, onSuccess }) => {
           </div>
         </div>
 
-        {/* Counter Quantity */}
         <div className="mt-5 flex items-center justify-between">
           <span className="text-xs font-medium text-neutral-800">Jumlah</span>
 
@@ -98,7 +97,6 @@ const BeliBarangModal = ({ isOpen, onClose, item, onSuccess }) => {
           </div>
         </div>
 
-        {/* Total Price Box */}
         <div className="mt-4 flex items-center justify-between rounded-lg bg-neutral-50 p-3 px-3.5">
           <span className="text-xs text-neutral-400">Total</span>
           <span className="text-sm font-bold text-neutral-900">{formatRupiah(total)}</span>
@@ -107,7 +105,6 @@ const BeliBarangModal = ({ isOpen, onClose, item, onSuccess }) => {
 
       <div className="mt-5 h-px bg-neutral-100" />
 
-      {/* Footer Actions */}
       <div className="flex justify-end gap-2.5 p-4 px-6">
         <button
           onClick={handleClose}

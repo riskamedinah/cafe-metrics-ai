@@ -16,7 +16,7 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem('token', accessToken);
       localStorage.setItem('user', JSON.stringify(userData));
       sessionStorage.removeItem('token');
-      sessionStorage.removeItem('user');
+      sessionStorage.removeItem('user');  
     } else {
       sessionStorage.setItem('token', accessToken);
       sessionStorage.setItem('user', JSON.stringify(userData));

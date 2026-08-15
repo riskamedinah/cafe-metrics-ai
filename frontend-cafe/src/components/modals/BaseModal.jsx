@@ -15,7 +15,6 @@ const BaseModal = ({ isOpen, onClose, title, children, maxWidth = "max-w-[460px]
           maxWidth.startsWith("max-w-") ? maxWidth : ""
         }`}
       >
-        {/* Header */}
         <div className="flex shrink-0 items-center justify-between px-6 pt-5 pb-4">
           <span className="text-[15px] font-bold text-neutral-900">
             {title}
@@ -28,10 +27,8 @@ const BaseModal = ({ isOpen, onClose, title, children, maxWidth = "max-w-[460px]
           </button>
         </div>
 
-        {/* Divider */}
         <div className="h-px shrink-0 bg-neutral-100" />
 
-        {/* Content Body */}
         <div className="min-h-0 flex-1 overflow-y-auto">
           {children}
         </div>

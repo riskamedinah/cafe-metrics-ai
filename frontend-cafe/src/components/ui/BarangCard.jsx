@@ -13,7 +13,6 @@ const BarangCard = ({ item, onBeli }) => {
 
   return (
     <div className="bg-white rounded-2xl p-3.5 flex flex-col shadow-sm hover:-translate-y-0.5 hover:shadow-md transition-all duration-150 ease-in-out">
-      {/* Container Gambar - Pakai aspect-video bawaan Tailwind */}
       <div className="bg-gray-100 aspect-video rounded-lg flex items-center justify-center overflow-hidden mb-4">
         {!imgError ? (
           <img
@@ -46,17 +45,14 @@ const BarangCard = ({ item, onBeli }) => {
         )}
       </div>
 
-      {/* Judul Barang */}
       <p className="text-base font-medium text-gray-900 mb-1 leading-snug">
         {item.nama}
       </p>
 
-      {/* Deskripsi Barang */}
       <p className="text-sm font-normal text-gray-500 mb-4 leading-snug line-clamp-1">
         {item.deskripsi}
       </p>
 
-      {/* Tombol Aksi */}
       <button
         onClick={handleBeli}
         className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white border-none rounded-lg text-xs font-semibold cursor-pointer transition-colors duration-150 ease-in-out mt-auto"

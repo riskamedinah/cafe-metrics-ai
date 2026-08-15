@@ -123,7 +123,6 @@ const ToastItem = ({ toast, onClose }) => {
         <X size={16} />
       </button>
 
-      {/* Progress Bar sederhana dengan CSS Transition */}
       {duration ? (
         <div
           className={`absolute left-0 bottom-0 h-0.5 w-full origin-left opacity-60 ${barClass}`}
