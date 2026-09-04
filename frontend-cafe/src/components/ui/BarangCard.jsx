@@ -13,16 +13,17 @@ const BarangCard = ({ item, onBeli }) => {
 
   return (
     <div className="bg-white rounded-2xl p-3.5 flex flex-col shadow-sm hover:-translate-y-0.5 hover:shadow-md transition-all duration-150 ease-in-out">
-      <div className="bg-gray-100 aspect-video rounded-lg flex items-center justify-center overflow-hidden mb-4">
+      {/* Background container gambar diubah ke bg-white */}
+      <div className="bg-white aspect-video rounded-lg flex items-center justify-center overflow-hidden mb-4 p-2">
         {!imgError ? (
           <img
             src={item.gambar}
             alt={item.nama}
             onError={() => setImgError(true)}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-contain object-center"
           />
         ) : (
-          <div className="w-16 h-16 rounded-lg bg-gray-200 flex items-center justify-center">
+          <div className="w-16 h-16 rounded-lg bg-gray-100 flex items-center justify-center">
             <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24">
               <rect
                 x="3"

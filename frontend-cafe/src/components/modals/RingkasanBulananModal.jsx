@@ -19,7 +19,7 @@ const parseRingkasanAI = (text) => {
 
     rekomendasi = rekomendasiBlock
       .split(/\n+/)
-      .map((line) => line.replace(/^[\d+.\-*]\s*/, "").trim())
+      .map((line) => line.replace(/^[\s\d•\-\*\.]+/g, "").trim())
       .filter(Boolean);
   }
 
@@ -43,7 +43,7 @@ const RingkasanBulananModal = ({ isOpen, onClose, data }) => {
   ];
 
   return (
-    <BaseModal isOpen={isOpen} onClose={onClose} title="Detail Ringkasan" maxWidth="max-w-2xl">
+    <BaseModal isOpen={isOpen} onClose={onClose} title="Detail Ringkasan" maxWidth="max-w-xl">
       <div className="p-6 flex flex-col gap-5">
         
         <div className="grid grid-cols-2 sm:grid-cols-4 border border-gray-200 rounded-xl overflow-hidden bg-gray-50">

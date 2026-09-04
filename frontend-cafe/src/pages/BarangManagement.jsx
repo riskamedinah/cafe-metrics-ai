@@ -147,7 +147,7 @@ const handleHapus = async () => {
       header: "Gambar",
       key: "foto_barang",
       render: (item) => (
-        <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-md bg-neutral-100">
+        <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-md bg-white">
           <img
             src={item.foto_barang || "https://picsum.photos/seed/placeholder/40/40"}
             alt={item.nama_barang}
